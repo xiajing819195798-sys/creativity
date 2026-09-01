@@ -38,7 +38,7 @@
       <p class="lead">本测评包含开放题与物品多用途任务。请独立作答，不查资料；答案的数量、差异和新颖程度都可能被研究者分析。</p>
       <div class="facts">
         <div class="fact"><b>8</b><span>个任务</span></div>
-        <div class="fact"><b>每题 5 分钟</b><span>时间到自动进入下一题</span></div>
+        <div class="fact"><b>每题 3–7 分钟</b><span>总上限约 38 分钟</span></div>
         <div class="fact"><b>自动暂存</b><span>本设备浏览器内保存</span></div>
       </div>
       <div class="formgrid">
@@ -94,19 +94,19 @@
 <script>
 (function(){
   "use strict";
-  var KEY="creativity_posttest_v3";
+  var KEY="creativity_posttest_v4";
   var CLOUD_ENV="creativity-d6gaz98q82144e44e";
   var CLOUD_ACCESS_KEY="eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ3ODkzMjBhLWRiOWQtNDk5OS1hMDgyLWVkYzVjYmYzY2RiNSJ9.eyJpc3MiOiJodHRwczovL2NyZWF0aXZpdHktZDZnYXo5OHE4MjE0NGU0NGUuYXAtc2hhbmdoYWkudGNiLWFwaS50ZW5jZW50Y2xvdWRhcGkuY29tIiwic3ViIjoiYW5vbiIsImF1ZCI6ImNyZWF0aXZpdHktZDZnYXo5OHE4MjE0NGU0NGUiLCJleHAiOjQwOTE5NTI1NzMsImlhdCI6MTc4ODI2OTM3Mywibm9uY2UiOiJNOG10LWdOcFJocWVROXFUbHpBbHZRIiwiYXRfaGFzaCI6Ik04bXQtZ05wUmhxZVE5cVRsekFsdlEiLCJuYW1lIjoiQW5vbnltb3VzIiwic2NvcGUiOiJhbm9ueW1vdXMiLCJwcm9qZWN0X2lkIjoiY3JlYXRpdml0eS1kNmdhejk4cTgyMTQ0ZTQ0ZSIsIm1ldGEiOnsicGxhdGZvcm0iOiJQdWJsaXNoYWJsZUtleSJ9LCJyb2xlIjoiYW5vbiIsImlzX2Fub255bW91cyI6dHJ1ZSwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiYW5vbnltb3VzIiwicHJvdmlkZXJzIjpbImFub255bW91cyJdfSwidXNlcl9tZXRhZGF0YSI6eyJuYW1lIjoiQW5vbnltb3VzIn0sInVzZXJfdHlwZSI6IiIsImNsaWVudF90eXBlIjoiY2xpZW50X3VzZXIiLCJpc19zeXN0ZW1fYWRtaW4iOmZhbHNlfQ.BUOE-LR3VQCowe-IeYF8Oxm-X-dbwFEEfzNJyHOddEEiJKWW64YiecAqTFsPwJ77V8SDHfIstlydvPF4fwWmqeDtzvX9oGLW2Ao-BZwJ7-i-G-NfXOASV3XirHyXighCrmQopvgOzKMSVQhDvueld5RvHXcbtF419vNq0EmYlYJyNJ4zpReXgHIdX5VgzfvAxVvqC28aoqL2j_aoorC_q61K52K1OgYSlJ6_nsnAR-U1n2s7Ej5oLab0xqJF7Pnzxvj3HmnIcu_40I_O3elUSUsHS7QsSIqeWYw_Y51FtCABF7lhQ93Og3C7YBPnOOCVYih5fIYjAAeOYO8S894hhA";
   var COLLECTION="creativity_submissions";
   var tasks=[
     {id:"anchor_2983",title:"数字故事：2983",tag:"前后测锚题 · 书面表达",mins:5,type:"text",prompt:"学校将举办一次创意故事展。请根据数字“2983”想出一个有趣而不同寻常的故事构想。用几句话说明故事发生了什么。",hint:"尽量写得清楚、完整，并让想法与常见答案有所不同。"},
     {id:"anchor_carpooling",title:"让拼车方案更有效",tag:"前后测锚题 · 社会问题解决",mins:5,type:"text",prompt:"一座城市希望更多人拼车。现有方案是给拼车者提供燃油费或通行费折扣。请提出一种办法，使这个方案更有效、更有吸引力。不要只增加现金或折扣。",hint:"说明你的办法是什么，以及为什么可能有效。"},
-    {id:"parallel_robot",title:"机器人电影",tag:"平行任务 · 多样想法",mins:5,type:"ideas",minIdeas:3,maxIdeas:6,prompt:"一位电影导演要拍一部关于智能机器人的影片。请提出三个彼此明显不同的故事构想。",hint:"每一格写一个构想。重点是让三个故事在人物、冲突或结局等方面真正不同。"},
+    {id:"parallel_robot",title:"机器人电影",tag:"平行任务 · 多样想法",mins:7,type:"ideas",minIdeas:3,maxIdeas:6,prompt:"一位电影导演要拍一部关于智能机器人的影片。请提出三个彼此明显不同的故事构想。",hint:"每一格写一个构想。重点是让三个故事在人物、冲突或结局等方面真正不同。"},
     {id:"parallel_bees",title:"让大家认识蜜蜂",tag:"平行任务 · 社会问题解决",mins:5,type:"text",prompt:"学校自然社团希望让更多同学认识蜜蜂的重要性。请提出一个有创意、能吸引同学参与的活动方案。",hint:"说明活动怎样进行、同学们会做什么。"},
     {id:"parallel_river_causes",title:"河边的青蛙",tag:"平行任务 · 科学问题解决",mins:5,type:"ideas",minIdeas:3,maxIdeas:6,prompt:"调查发现河边青蛙的数量明显减少。请提出三个彼此不同、可以进一步调查的原因。",hint:"每一格写一个原因。三个原因最好来自不同角度。"},
     {id:"parallel_river_improve",title:"改进河水调查",tag:"平行任务 · 评价和改进",mins:5,type:"text",prompt:"同学们计划只取一瓶河水、观察颜色，来判断污染是否导致青蛙减少。请改进这个调查方案，使结论更可靠。",hint:"可以考虑取样、比较、测量或其他证据。"},
-    {id:"aut_cup",title:"纸杯的新用途",tag:"AUT · 发散思维",mins:5,type:"ideas",minIdeas:4,maxIdeas:10,prompt:"纸杯除了用来喝水，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。不要只换一种饮料；用途越多样越好。"},
-    {id:"aut_box",title:"纸盒的新用途",tag:"AUT · 发散思维",mins:5,type:"ideas",minIdeas:4,maxIdeas:10,prompt:"纸盒除了装东西，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。答案要能说得通，也可以大胆想象。"}
+    {id:"aut_cup",title:"纸杯的新用途",tag:"AUT · 发散思维",mins:3,type:"ideas",minIdeas:4,maxIdeas:10,prompt:"纸杯除了用来喝水，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。不要只换一种饮料；用途越多样越好。"},
+    {id:"aut_box",title:"纸盒的新用途",tag:"AUT · 发散思维",mins:3,type:"ideas",minIdeas:4,maxIdeas:10,prompt:"纸盒除了装东西，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。答案要能说得通，也可以大胆想象。"}
   ];
   var state={meta:{},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,startedAt:null,submittedAt:null};
   var timer=null,lastTick=null,advancing=false;
@@ -190,7 +190,7 @@
       var app=window.cloudbase.init({env:CLOUD_ENV,region:"ap-shanghai",accessKey:CLOUD_ACCESS_KEY});
       state.submittedAt=new Date().toISOString();
       var payload=rowData();
-      payload.instrument_version="creativity_posttest_v3";
+      payload.instrument_version="creativity_posttest_v4_timed";
       payload.client_submitted_at=state.submittedAt;
       payload.user_agent=navigator.userAgent.slice(0,300);
       var row={
