@@ -11,20 +11,9 @@
 
 ## 数据回收
 
-学生完成后通过网页统一提交至腾讯云 CloudBase 环境 `creativity-d6gaz98q82144e44e` 的 `creativity_submissions` 集合。学生端不提供结果文件下载，也不提供数据库查询、修改或删除功能。研究者通过自己的腾讯云账号查看并导出结果。
+学生完成后通过网页统一提交至腾讯云 CloudBase PostgreSQL 表 `public.creativity_submissions`。学生端只被授予 `INSERT` 权限，并且没有 `SELECT`、`UPDATE` 或 `DELETE` 权限，因此不能查看、修改或下载汇总结果。研究者通过自己的腾讯云账号查看并导出数据。
 
-数据库安全规则必须设置为：
-
-```json
-{
-  "read": false,
-  "create": "auth != null && auth.loginType == 'ANONYMOUS'",
-  "update": false,
-  "delete": false
-}
-```
-
-同时应启用匿名登录，并将 `xiajing819195798-sys.github.io` 加入 Web 安全域名。
+前端使用权限受限的 Publishable Key（`anon` 角色），不得使用服务端 API Key 或 `service_role` 密钥。Web 安全域名应包含 `xiajing819195798-sys.github.io`。
 
 正式施测前请完成知情同意、预测试、评分员培训和提交演练。班级代码建议代表学生归属班级，教师轮转信息另建教师—班级—时段对应表，不要在学生答题数据中存储姓名。
 
