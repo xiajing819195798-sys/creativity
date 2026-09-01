@@ -76,26 +76,28 @@
     <section id="finish" class="card hidden">
       <span class="eyebrow">提交前检查</span>
       <h2>你的答案已保存在这台设备上</h2>
-      <p class="lead">请先检查有没有漏答。确认后下载数据文件，并按老师要求提交。网页不会自动把数据上传到网络。</p>
+      <p class="lead">请先检查有没有漏答。确认后点击“统一提交”；答案将加密发送到研究者的腾讯云数据库，学生端无法查看其他人的数据。</p>
       <div class="notice" id="summary"></div>
       <div class="review" id="review"></div>
       <div class="btnrow">
         <button class="btn secondary" id="backToTest">返回修改</button>
-        <button class="btn primary" id="downloadCsv">下载 CSV</button>
-        <button class="btn primary" id="downloadJson">下载 JSON 备份</button>
-        <button class="btn ghost" id="copyData">复制数据</button>
+        <button class="btn primary" id="submitCloud">统一提交给研究者</button>
       </div>
-      <div class="btnrow"><button class="btn ghost danger" id="clearData">清除本机记录</button></div>
+      <div class="notice hidden" id="submitStatus" style="margin-top:16px"></div>
+      <div class="btnrow"><button class="btn ghost danger" id="clearData">清除本机暂存</button></div>
     </section>
 
-    <p class="footer">研究说明：本工具用于教育研究中的创造性思维后测，不是正式 PISA 或 OECD 测验。部分任务依据 PISA 2022 创造性思维公开题的构念与情境进行中文简化或改编，改编内容由研究者负责，OECD 不对本工具背书。AUT 结果建议由至少两名评分者依据流畅性、灵活性、独创性与适切性编码；本网页仅自动统计非重复答案数量，不自动判断独创性。</p>
+    <p class="footer">研究说明：本工具用于教育研究中的创造性思维后测，不是正式 PISA 或 OECD 测验。部分任务依据 PISA 2022 创造性思维公开题的构念与情境进行中文简化或改编，改编内容由研究者负责，OECD 不对本工具背书。答案提交至研究者管理的腾讯云 CloudBase；学生端仅允许新增记录，不能查询、修改或下载汇总数据。AUT 结果建议由至少两名评分者依据流畅性、灵活性、独创性与适切性编码。</p>
   </main>
   <div class="toast" id="toast"></div>
 
+<script src="https://static.cloudbase.net/cloudbase-js-sdk/2.17.3/cloudbase.full.js"></script>
 <script>
 (function(){
   "use strict";
-  var KEY="creativity_posttest_v1";
+  var KEY="creativity_posttest_v2";
+  var CLOUD_ENV="creativity-d6gaz98q82144e44e";
+  var COLLECTION="creativity_submissions";
   var tasks=[
     {id:"anchor_2983",title:"数字故事：2983",tag:"前后测锚题 · 书面表达",mins:5,type:"text",prompt:"学校将举办一次创意故事展。请根据数字“2983”想出一个有趣而不同寻常的故事构想。用几句话说明故事发生了什么。",hint:"尽量写得清楚、完整，并让想法与常见答案有所不同。"},
     {id:"anchor_carpooling",title:"让拼车方案更有效",tag:"前后测锚题 · 社会问题解决",mins:5,type:"text",prompt:"一座城市希望更多人拼车。现有方案是给拼车者提供燃油费或通行费折扣。请提出一种办法，使这个方案更有效、更有吸引力。不要只增加现金或折扣。",hint:"说明你的办法是什么，以及为什么可能有效。"},
@@ -146,8 +148,9 @@
   function ideaRow(i,v){var row=document.createElement("div");row.className="idearow";var n=document.createElement("span");n.className="num";n.textContent=i+1;var inp=document.createElement("input");inp.className="idea";inp.placeholder="想法 "+(i+1);inp.value=v;inp.addEventListener("input",debouncedSave);row.appendChild(n);row.appendChild(inp);return row}
   var debounce=null;function debouncedSave(){clearTimeout(debounce);debounce=setTimeout(function(){capture();save()},350)}
   function capture(){var t=tasks[state.current];if(t.type==="text"){var a=el("singleAnswer");if(a)state.answers[t.id]=a.value.trim()}else{state.answers[t.id]=Array.prototype.map.call(document.querySelectorAll(".idea"),function(x){return x.value.trim()})}}
-  function go(delta){capture();save();if(delta>0&&state.current===tasks.length-1){state.submittedAt=new Date().toISOString();save();finish();return}state.current=Math.max(0,Math.min(tasks.length-1,state.current+delta));render()}
-  function finish(){clearInterval(timer);show("finish");var done=tasks.filter(function(t){var a=state.answers[t.id];return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}).length;el("summary").innerHTML="<b>"+esc(state.meta.studentId)+"</b> 已完成 "+done+" / "+tasks.length+" 题，累计用时 "+fmt(secondsTotal())+"。请下载文件交给老师。";
+  function go(delta){capture();save();if(delta>0&&state.current===tasks.length-1){save();finish();return}state.current=Math.max(0,Math.min(tasks.length-1,state.current+delta));render()}
+  function finish(){clearInterval(timer);show("finish");var done=tasks.filter(function(t){var a=state.answers[t.id];return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}).length;el("summary").innerHTML="<b>"+esc(state.meta.studentId)+"</b> 已完成 "+done+" / "+tasks.length+" 题，累计用时 "+fmt(secondsTotal())+"。请检查后统一提交。";
+    if(state.cloudSubmissionId){showSubmitted(state.cloudSubmissionId)}
     el("review").innerHTML=tasks.map(function(t,i){var a=state.answers[t.id],txt=Array.isArray(a)?a.filter(Boolean).map(function(x,j){return (j+1)+". "+x}).join("\n"):(a||"");return '<div class="reviewitem"><b>'+(i+1)+". "+esc(t.title)+'</b><div>'+esc(txt||"（未作答）")+"</div></div>"}).join("");
   }
   function csvCell(x){var s=String(x==null?"":x);return '"'+s.replace(/"/g,'""')+'"'}
@@ -164,9 +167,37 @@
   el("resume").onclick=function(){if(!load()){toast("没有找到上次记录");return}el("studentId").value=state.meta.studentId||"";el("grade").value=state.meta.grade||"";el("classCode").value=state.meta.classCode||"";show("test");render();startTimer()};
   el("prev").onclick=function(){go(-1)};el("next").onclick=function(){go(1)};
   el("backToTest").onclick=function(){show("test");render();startTimer()};
-  el("downloadCsv").onclick=dlCsv;el("downloadJson").onclick=dlJson;
-  el("copyData").onclick=function(){navigator.clipboard.writeText(JSON.stringify(rowData(),null,2)).then(function(){toast("数据已复制")}).catch(function(){toast("浏览器不允许复制，请下载文件")})};
-  el("clearData").onclick=function(){if(confirm("确定清除这台设备上的全部作答记录吗？清除后无法恢复。")){localStorage.removeItem(KEY);location.reload()}};
+  el("submitCloud").onclick=submitCloud;
+  async function submitCloud(){
+    if(state.cloudSubmissionId){toast("这份答案已经提交");return}
+    var completed=tasks.filter(function(t){var a=state.answers[t.id];return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}).length;
+    if(completed<tasks.length&&!confirm("还有 "+(tasks.length-completed)+" 题未作答，仍然提交吗？"))return;
+    var btn=el("submitCloud"),status=el("submitStatus");btn.disabled=true;btn.textContent="正在安全提交……";status.classList.remove("hidden");status.textContent="正在连接研究数据库，请不要关闭页面。";
+    try{
+      if(!window.cloudbase)throw new Error("CloudBase SDK 未加载");
+      var app=window.cloudbase.init({env:CLOUD_ENV});
+      var auth=app.auth();
+      await auth.signInAnonymously();
+      state.submittedAt=new Date().toISOString();
+      var payload=rowData();
+      payload.instrument_version="creativity_posttest_v2";
+      payload.client_submitted_at=state.submittedAt;
+      payload.user_agent=navigator.userAgent.slice(0,300);
+      var result=await app.database().collection(COLLECTION).add(payload);
+      state.cloudSubmissionId=result.id||result._id||"submitted";
+      save();showSubmitted(state.cloudSubmissionId);toast("提交成功");
+    }catch(err){
+      console.error(err);state.submittedAt=null;btn.disabled=false;btn.textContent="重新提交";
+      status.className="notice";status.style.background="#fff1f1";status.style.color="#8b3030";
+      status.textContent="提交失败，答案仍保存在本机。请检查网络，或请老师确认数据库和匿名登录已经启用。";
+    }
+  }
+  function showSubmitted(id){
+    var btn=el("submitCloud"),status=el("submitStatus");btn.disabled=true;btn.textContent="已提交";
+    el("backToTest").disabled=true;status.className="notice";status.style.background="#e7f7ef";status.style.color="#246246";
+    status.innerHTML="<b>提交成功。</b> 提交编号："+esc(id)+"。请告知老师后关闭页面。";
+  }
+  el("clearData").onclick=function(){if(confirm("确定清除这台设备上的全部作答暂存吗？已成功提交的数据不会从研究数据库删除。")){localStorage.removeItem(KEY);location.reload()}};
   if(localStorage.getItem(KEY)){el("resume").disabled=false;el("saveState").textContent="发现未提交或已保存的记录"}else{el("resume").disabled=true}
 })();
 </script>
