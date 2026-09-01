@@ -91,12 +91,13 @@
   </main>
   <div class="toast" id="toast"></div>
 
-<script src="https://static.cloudbase.net/cloudbase-js-sdk/2.17.3/cloudbase.full.js"></script>
+<script src="https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js"></script>
 <script>
 (function(){
   "use strict";
-  var KEY="creativity_posttest_v2";
+  var KEY="creativity_posttest_v3";
   var CLOUD_ENV="creativity-d6gaz98q82144e44e";
+  var CLOUD_ACCESS_KEY="eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ3ODkzMjBhLWRiOWQtNDk5OS1hMDgyLWVkYzVjYmYzY2RiNSJ9.eyJpc3MiOiJodHRwczovL2NyZWF0aXZpdHktZDZnYXo5OHE4MjE0NGU0NGUuYXAtc2hhbmdoYWkudGNiLWFwaS50ZW5jZW50Y2xvdWRhcGkuY29tIiwic3ViIjoiYW5vbiIsImF1ZCI6ImNyZWF0aXZpdHktZDZnYXo5OHE4MjE0NGU0NGUiLCJleHAiOjQwOTE5NTI1NzMsImlhdCI6MTc4ODI2OTM3Mywibm9uY2UiOiJNOG10LWdOcFJocWVROXFUbHpBbHZRIiwiYXRfaGFzaCI6Ik04bXQtZ05wUmhxZVE5cVRsekFsdlEiLCJuYW1lIjoiQW5vbnltb3VzIiwic2NvcGUiOiJhbm9ueW1vdXMiLCJwcm9qZWN0X2lkIjoiY3JlYXRpdml0eS1kNmdhejk4cTgyMTQ0ZTQ0ZSIsIm1ldGEiOnsicGxhdGZvcm0iOiJQdWJsaXNoYWJsZUtleSJ9LCJyb2xlIjoiYW5vbiIsImlzX2Fub255bW91cyI6dHJ1ZSwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiYW5vbnltb3VzIiwicHJvdmlkZXJzIjpbImFub255bW91cyJdfSwidXNlcl9tZXRhZGF0YSI6eyJuYW1lIjoiQW5vbnltb3VzIn0sInVzZXJfdHlwZSI6IiIsImNsaWVudF90eXBlIjoiY2xpZW50X3VzZXIiLCJpc19zeXN0ZW1fYWRtaW4iOmZhbHNlfQ.BUOE-LR3VQCowe-IeYF8Oxm-X-dbwFEEfzNJyHOddEEiJKWW64YiecAqTFsPwJ77V8SDHfIstlydvPF4fwWmqeDtzvX9oGLW2Ao-BZwJ7-i-G-NfXOASV3XirHyXighCrmQopvgOzKMSVQhDvueld5RvHXcbtF419vNq0EmYlYJyNJ4zpReXgHIdX5VgzfvAxVvqC28aoqL2j_aoorC_q61K52K1OgYSlJ6_nsnAR-U1n2s7Ej5oLab0xqJF7Pnzxvj3HmnIcu_40I_O3elUSUsHS7QsSIqeWYw_Y51FtCABF7lhQ93Og3C7YBPnOOCVYih5fIYjAAeOYO8S894hhA";
   var COLLECTION="creativity_submissions";
   var tasks=[
     {id:"anchor_2983",title:"数字故事：2983",tag:"前后测锚题 · 书面表达",mins:5,type:"text",prompt:"学校将举办一次创意故事展。请根据数字“2983”想出一个有趣而不同寻常的故事构想。用几句话说明故事发生了什么。",hint:"尽量写得清楚、完整，并让想法与常见答案有所不同。"},
@@ -175,21 +176,29 @@
     var btn=el("submitCloud"),status=el("submitStatus");btn.disabled=true;btn.textContent="正在安全提交……";status.classList.remove("hidden");status.textContent="正在连接研究数据库，请不要关闭页面。";
     try{
       if(!window.cloudbase)throw new Error("CloudBase SDK 未加载");
-      var app=window.cloudbase.init({env:CLOUD_ENV});
-      var auth=app.auth();
-      await auth.signInAnonymously();
+      var app=window.cloudbase.init({env:CLOUD_ENV,region:"ap-shanghai",accessKey:CLOUD_ACCESS_KEY});
       state.submittedAt=new Date().toISOString();
       var payload=rowData();
-      payload.instrument_version="creativity_posttest_v2";
+      payload.instrument_version="creativity_posttest_v3";
       payload.client_submitted_at=state.submittedAt;
       payload.user_agent=navigator.userAgent.slice(0,300);
-      var result=await app.database().collection(COLLECTION).add(payload);
-      state.cloudSubmissionId=result.id||result._id||"submitted";
+      var row={
+        student_id:String(state.meta.studentId||"").slice(0,30),
+        grade:Number(state.meta.grade),
+        class_code:String(state.meta.classCode||"").slice(0,20),
+        started_at:state.startedAt,
+        submitted_at:state.submittedAt,
+        total_seconds:secondsTotal(),
+        payload:payload
+      };
+      var result=await app.rdb().from(COLLECTION).insert(row);
+      if(result&&result.error)throw result.error;
+      state.cloudSubmissionId="R-"+safeName(state.meta.studentId)+"-"+Date.now().toString(36).toUpperCase();
       save();showSubmitted(state.cloudSubmissionId);toast("提交成功");
     }catch(err){
       console.error(err);state.submittedAt=null;btn.disabled=false;btn.textContent="重新提交";
       status.className="notice";status.style.background="#fff1f1";status.style.color="#8b3030";
-      status.textContent="提交失败，答案仍保存在本机。请检查网络，或请老师确认数据库和匿名登录已经启用。";
+      status.textContent="提交失败，答案仍保存在本机。请检查网络，或请老师确认 PostgreSQL 表、RLS 权限和 Web 安全域名已经配置。";
     }
   }
   function showSubmitted(id){
