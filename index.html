@@ -38,7 +38,7 @@
       <p class="lead">本测评包含开放题与物品多用途任务。请独立作答，不查资料；答案的数量、差异和新颖程度都可能被研究者分析。</p>
       <div class="facts">
         <div class="fact"><b>8</b><span>个任务</span></div>
-        <div class="fact"><b>约 35–45 分钟</b><span>按自己的节奏完成</span></div>
+        <div class="fact"><b>每题 5 分钟</b><span>时间到自动进入下一题</span></div>
         <div class="fact"><b>自动暂存</b><span>本设备浏览器内保存</span></div>
       </div>
       <div class="formgrid">
@@ -46,7 +46,7 @@
         <div class="field"><label for="grade">年级</label><select id="grade"><option value="">请选择</option><option value="5">五年级</option><option value="6">六年级</option></select></div>
         <div class="field"><label for="classCode">班级代码</label><input id="classCode" maxlength="20" autocomplete="off" placeholder="例如：501"></div>
       </div>
-      <label class="consent"><input type="checkbox" id="consent"><span>老师已向我说明测评用途。我知道参加不影响学业成绩，可以按真实想法作答。请不要填写姓名、手机号等个人信息。</span></label>
+      <div class="notice"><b>限时规则：</b>进入每道题后开始倒计时；时间到会自动保存并进入下一题，进入下一题后不能返回。刷新或关闭网页不会重置当前题时间。</div><label class="consent"><input type="checkbox" id="consent"><span>老师已向我说明测评用途和限时规则。我知道参加不影响学业成绩，可以按真实想法作答。请不要填写姓名、手机号等个人信息。</span></label>
       <div class="btnrow">
         <button class="btn primary" id="begin">开始作答</button>
         <button class="btn ghost" id="resume">继续上次作答</button>
@@ -67,7 +67,7 @@
         <div class="hint" id="hint"></div>
         <div id="answerArea"></div>
         <div class="btnrow">
-          <button class="btn secondary" id="prev">上一题</button>
+          <span class="small">进入下一题后不能返回</span>
           <button class="btn primary" id="next">保存并下一题</button>
         </div>
       </article>
@@ -76,11 +76,10 @@
     <section id="finish" class="card hidden">
       <span class="eyebrow">提交前检查</span>
       <h2>你的答案已保存在这台设备上</h2>
-      <p class="lead">请先检查有没有漏答。确认后点击“统一提交”；答案将加密发送到研究者的腾讯云数据库，学生端无法查看其他人的数据。</p>
+      <p class="lead">请核对作答记录。限时作答已结束，不能返回修改；确认后点击“统一提交”。答案将发送到研究者的腾讯云数据库，学生端无法查看其他人的数据。</p>
       <div class="notice" id="summary"></div>
       <div class="review" id="review"></div>
       <div class="btnrow">
-        <button class="btn secondary" id="backToTest">返回修改</button>
         <button class="btn primary" id="submitCloud">统一提交给研究者</button>
       </div>
       <div class="notice hidden" id="submitStatus" style="margin-top:16px"></div>
@@ -109,30 +108,43 @@
     {id:"aut_cup",title:"纸杯的新用途",tag:"AUT · 发散思维",mins:5,type:"ideas",minIdeas:4,maxIdeas:10,prompt:"纸杯除了用来喝水，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。不要只换一种饮料；用途越多样越好。"},
     {id:"aut_box",title:"纸盒的新用途",tag:"AUT · 发散思维",mins:5,type:"ideas",minIdeas:4,maxIdeas:10,prompt:"纸盒除了装东西，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。答案要能说得通，也可以大胆想象。"}
   ];
-  var state={meta:{},answers:{},taskStarted:{},taskSeconds:{},current:0,startedAt:null,submittedAt:null};
-  var timer=null,lastTick=null;
+  var state={meta:{},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,startedAt:null,submittedAt:null};
+  var timer=null,lastTick=null,advancing=false;
   function el(id){return document.getElementById(id)}
   function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]})}
   function show(which){["start","test","finish"].forEach(function(id){el(id).classList.toggle("hidden",id!==which)})}
   function toast(msg){el("toast").textContent=msg;el("toast").classList.add("show");setTimeout(function(){el("toast").classList.remove("show")},1600)}
   function save(){localStorage.setItem(KEY,JSON.stringify(state));el("saveState").textContent="已自动保存 · "+new Date().toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});}
-  function load(){try{var x=JSON.parse(localStorage.getItem(KEY));if(x&&x.answers){state=x;return true}}catch(e){}return false}
+  function load(){try{var x=JSON.parse(localStorage.getItem(KEY));if(x&&x.answers){state=x;state.taskStarted=state.taskStarted||{};state.taskDeadline=state.taskDeadline||{};state.taskSeconds=state.taskSeconds||{};return true}}catch(e){}return false}
   function uniqCount(a){var seen={};return (a||[]).filter(function(x){var k=String(x).trim().toLowerCase();if(!k||seen[k])return false;seen[k]=1;return true}).length}
   function secondsTotal(){return Math.max(0,Math.round((Date.now()-new Date(state.startedAt).getTime())/1000))}
   function fmt(n){n=Math.max(0,n||0);return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
-  function startTimer(){clearInterval(timer);lastTick=Date.now();timer=setInterval(function(){var now=Date.now(),d=Math.round((now-lastTick)/1000);lastTick=now;if(!el("test").classList.contains("hidden")){var id=tasks[state.current].id;state.taskSeconds[id]=(state.taskSeconds[id]||0)+d;el("elapsed").textContent=fmt(secondsTotal());if(state.taskSeconds[id]%10===0)save()}},1000)}
+  function remainingFor(t){var deadline=state.taskDeadline&&state.taskDeadline[t.id];return deadline?Math.max(0,Math.ceil((deadline-Date.now())/1000)):t.mins*60}
+  function updateCountdown(){
+    if(el("test").classList.contains("hidden"))return;
+    var t=tasks[state.current],remaining=remainingFor(t),box=el("taskTime");
+    box.textContent="剩余 "+fmt(remaining);box.style.color=remaining<=60?"#a93b3b":"";
+    if(remaining<=0&&!advancing)autoAdvance();
+  }
+  function autoAdvance(){
+    if(advancing)return;advancing=true;capture();
+    var t=tasks[state.current];state.taskSeconds[t.id]=t.mins*60;save();
+    if(state.current===tasks.length-1){advancing=false;finish();return}
+    state.current+=1;advancing=false;toast("本题时间到，已自动进入下一题");render();
+  }
+  function startTimer(){clearInterval(timer);lastTick=Date.now();timer=setInterval(function(){var now=Date.now(),d=Math.max(0,Math.round((now-lastTick)/1000));lastTick=now;if(!el("test").classList.contains("hidden")){var t=tasks[state.current],id=t.id;state.taskSeconds[id]=Math.min(t.mins*60,(state.taskSeconds[id]||0)+d);el("elapsed").textContent=fmt(secondsTotal());updateCountdown();if(state.taskSeconds[id]%10===0)save()}},1000)}
   function begin(){
     var sid=el("studentId").value.trim(),grade=el("grade").value,cc=el("classCode").value.trim();
     if(!sid||!grade||!cc){toast("请填写编号、年级和班级代码");return}
     if(!el("consent").checked){toast("请先阅读并勾选说明");return}
-    state={meta:{studentId:sid,grade:grade,classCode:cc},answers:{},taskStarted:{},taskSeconds:{},current:0,startedAt:new Date().toISOString(),submittedAt:null};
+    state={meta:{studentId:sid,grade:grade,classCode:cc},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,startedAt:new Date().toISOString(),submittedAt:null};
     save();show("test");render();startTimer();
   }
   function render(){
-    var t=tasks[state.current];state.taskStarted[t.id]=state.taskStarted[t.id]||new Date().toISOString();
+    var t=tasks[state.current];state.taskStarted[t.id]=state.taskStarted[t.id]||new Date().toISOString();state.taskDeadline=state.taskDeadline||{};state.taskDeadline[t.id]=state.taskDeadline[t.id]||Date.now()+t.mins*60*1000;
     el("stepText").textContent="第 "+(state.current+1)+" 题 / 共 "+tasks.length+" 题";
     el("bar").style.width=((state.current+1)/tasks.length*100)+"%";
-    el("taskTag").textContent=t.tag;el("taskTitle").textContent=t.title;el("taskTime").textContent="建议 "+t.mins+" 分钟";
+    el("taskTag").textContent=t.tag;el("taskTitle").textContent=t.title;
     el("prompt").textContent=t.prompt;el("hint").textContent=t.hint;el("elapsed").textContent=fmt(secondsTotal());
     var area=el("answerArea");area.innerHTML="";
     if(t.type==="text"){
@@ -144,12 +156,12 @@
       vals.forEach(function(v,i){box.appendChild(ideaRow(i,v))});area.appendChild(box);
       var add=document.createElement("button");add.type="button";add.className="add";add.textContent="+ 再添加一个想法";add.onclick=function(){capture();var arr=state.answers[t.id]||[];if(arr.length>=t.maxIdeas){toast("本题最多填写 "+t.maxIdeas+" 条");return}arr.push("");state.answers[t.id]=arr;render();setTimeout(function(){var ins=document.querySelectorAll(".idea");ins[ins.length-1].focus()},0)};area.appendChild(add);
     }
-    el("prev").disabled=state.current===0;el("next").textContent=state.current===tasks.length-1?"完成并检查":"保存并下一题";save();
+    el("next").textContent=state.current===tasks.length-1?"完成并检查":"保存并下一题";updateCountdown();save();
   }
   function ideaRow(i,v){var row=document.createElement("div");row.className="idearow";var n=document.createElement("span");n.className="num";n.textContent=i+1;var inp=document.createElement("input");inp.className="idea";inp.placeholder="想法 "+(i+1);inp.value=v;inp.addEventListener("input",debouncedSave);row.appendChild(n);row.appendChild(inp);return row}
   var debounce=null;function debouncedSave(){clearTimeout(debounce);debounce=setTimeout(function(){capture();save()},350)}
   function capture(){var t=tasks[state.current];if(t.type==="text"){var a=el("singleAnswer");if(a)state.answers[t.id]=a.value.trim()}else{state.answers[t.id]=Array.prototype.map.call(document.querySelectorAll(".idea"),function(x){return x.value.trim()})}}
-  function go(delta){capture();save();if(delta>0&&state.current===tasks.length-1){save();finish();return}state.current=Math.max(0,Math.min(tasks.length-1,state.current+delta));render()}
+  function go(){capture();save();if(state.current===tasks.length-1){finish();return}state.current+=1;render()}
   function finish(){clearInterval(timer);show("finish");var done=tasks.filter(function(t){var a=state.answers[t.id];return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}).length;el("summary").innerHTML="<b>"+esc(state.meta.studentId)+"</b> 已完成 "+done+" / "+tasks.length+" 题，累计用时 "+fmt(secondsTotal())+"。请检查后统一提交。";
     if(state.cloudSubmissionId){showSubmitted(state.cloudSubmissionId)}
     el("review").innerHTML=tasks.map(function(t,i){var a=state.answers[t.id],txt=Array.isArray(a)?a.filter(Boolean).map(function(x,j){return (j+1)+". "+x}).join("\n"):(a||"");return '<div class="reviewitem"><b>'+(i+1)+". "+esc(t.title)+'</b><div>'+esc(txt||"（未作答）")+"</div></div>"}).join("");
@@ -166,8 +178,7 @@
   function safeName(s){return String(s||"student").replace(/[^a-zA-Z0-9_-]/g,"_")}
   el("begin").onclick=begin;
   el("resume").onclick=function(){if(!load()){toast("没有找到上次记录");return}el("studentId").value=state.meta.studentId||"";el("grade").value=state.meta.grade||"";el("classCode").value=state.meta.classCode||"";show("test");render();startTimer()};
-  el("prev").onclick=function(){go(-1)};el("next").onclick=function(){go(1)};
-  el("backToTest").onclick=function(){show("test");render();startTimer()};
+  el("next").onclick=function(){go()};
   el("submitCloud").onclick=submitCloud;
   async function submitCloud(){
     if(state.cloudSubmissionId){toast("这份答案已经提交");return}
@@ -203,7 +214,7 @@
   }
   function showSubmitted(id){
     var btn=el("submitCloud"),status=el("submitStatus");btn.disabled=true;btn.textContent="已提交";
-    el("backToTest").disabled=true;status.className="notice";status.style.background="#e7f7ef";status.style.color="#246246";
+    status.className="notice";status.style.background="#e7f7ef";status.style.color="#246246";
     status.innerHTML="<b>提交成功。</b> 提交编号："+esc(id)+"。请告知老师后关闭页面。";
   }
   el("clearData").onclick=function(){if(confirm("确定清除这台设备上的全部作答暂存吗？已成功提交的数据不会从研究数据库删除。")){localStorage.removeItem(KEY);location.reload()}};
