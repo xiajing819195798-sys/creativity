@@ -198,7 +198,7 @@
     }catch(err){
       console.error(err);state.submittedAt=null;btn.disabled=false;btn.textContent="重新提交";
       status.className="notice";status.style.background="#fff1f1";status.style.color="#8b3030";
-      status.textContent="提交失败，答案仍保存在本机。请检查网络，或请老师确认 PostgreSQL 表、RLS 权限和 Web 安全域名已经配置。";
+      var detail=(err&&(err.message||err.error_description||err.code))?String(err.message||err.error_description||err.code).slice(0,220):"未知错误"; status.textContent="提交失败，答案仍保存在本机。错误信息："+detail;
     }
   }
   function showSubmitted(id){
