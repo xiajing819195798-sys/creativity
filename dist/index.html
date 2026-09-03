@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#126e68">
-  <title>创造性思维后测</title>
+  <title>创造性思维测评</title>
   <style>
     :root{--ink:#183230;--muted:#61736f;--paper:#fffdf7;--teal:#126e68;--teal2:#e2f3ef;--amber:#f2b84b;--line:#d8e4df;--danger:#a93b3b;--shadow:0 18px 50px rgba(30,67,62,.12)}
     *{box-sizing:border-box} body{margin:0;font-family:ui-rounded,"SF Pro Rounded","PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);background:radial-gradient(circle at 10% 10%,#e8f6f2 0,transparent 28%),radial-gradient(circle at 90% 0,#fff0c9 0,transparent 24%),#f7f5ed;min-height:100vh}
@@ -20,25 +20,26 @@
     .hidden{display:none!important}.progresswrap{margin:2px 0 18px}.progressmeta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-bottom:7px}.track{height:10px;background:#e4ece8;border-radius:99px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,var(--teal),#58a99f);border-radius:99px;transition:width .3s}
     .taskhead{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}.tag{display:inline-block;padding:6px 10px;border-radius:10px;background:#fff0c6;color:#765413;font-size:12px;font-weight:900}.time{white-space:nowrap;color:var(--muted);font-weight:800}.prompt{font-size:20px;line-height:1.75;margin:22px 0;background:#f4f8f5;border-left:5px solid var(--teal);padding:18px;border-radius:0 16px 16px 0}.hint{color:var(--muted);font-size:14px;margin:10px 0 16px}.answer{min-height:190px;resize:vertical;line-height:1.65}.ideas{display:grid;gap:10px}.idearow{display:grid;grid-template-columns:34px 1fr;gap:9px;align-items:center}.num{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--teal2);color:var(--teal);font-weight:900}.add{margin-top:10px;color:var(--teal);background:transparent;border:1px dashed var(--teal);border-radius:12px;padding:10px 14px;font-weight:800}
     .notice{border-radius:15px;padding:13px 15px;background:#edf7f5;color:#245e58;font-size:14px}.review{display:grid;gap:12px;margin:20px 0}.reviewitem{border:1px solid var(--line);border-radius:16px;padding:15px;background:#fff}.reviewitem b{display:block;margin-bottom:6px}.reviewitem div{white-space:pre-wrap;color:var(--muted);line-height:1.6}.footer{color:var(--muted);font-size:12px;line-height:1.65;margin:22px 8px 0}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:#173c38;color:#fff;padding:11px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:9}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .stimulus{display:grid;place-items:center;margin:0 0 16px}.stimulus svg{width:min(100%,460px);height:auto;border-radius:18px;border:1px solid var(--line);background:#fff}.collab{display:grid;gap:16px}.stage{border:1px solid var(--line);background:#fff;border-radius:18px;padding:17px}.stage h3{margin:0 0 7px;font-size:17px}.stage p{margin:0 0 12px;color:var(--muted);font-size:14px}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:10px}.chatbox{display:grid;gap:9px;max-height:310px;overflow:auto;padding:12px;background:#f4f8f5;border-radius:14px;margin:12px 0}.chatempty{color:var(--muted);font-size:14px;text-align:center;padding:18px}.msg{padding:10px 12px;border-radius:14px;line-height:1.55;white-space:pre-wrap;max-width:88%}.msg.user{justify-self:end;background:var(--teal);color:#fff}.msg.ai{justify-self:start;background:#fff;border:1px solid var(--line)}.chatrow{display:grid;grid-template-columns:1fr auto;gap:8px}.chatrow input{width:100%;border:1.5px solid var(--line);border-radius:13px;padding:12px}.condition{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:6px 10px;background:#e8f4ff;color:#245780;font-size:12px;font-weight:900}.aiwarn{margin-top:9px;color:var(--danger);font-size:13px}.reflection-grid{display:grid;gap:10px}.mini-label{display:block;font-size:13px;font-weight:800;margin:0 0 6px}.finalanswer{min-height:150px}
     dialog{border:0;border-radius:22px;box-shadow:var(--shadow);max-width:660px;width:calc(100% - 28px);padding:28px;color:var(--ink)}dialog::backdrop{background:rgba(12,35,32,.5)}.small{font-size:13px;color:var(--muted)}
-    @media(max-width:680px){.shell{padding-top:14px}.card{border-radius:22px;padding:22px}.formgrid,.facts{grid-template-columns:1fr}.topbar{align-items:flex-start}.autosave{max-width:135px;text-align:right}.taskhead{display:block}.time{margin-top:8px}.btnrow .btn{flex:1}}
+    @media(max-width:680px){.shell{padding-top:14px}.card{border-radius:22px;padding:22px}.formgrid,.facts,.twocol{grid-template-columns:1fr}.topbar{align-items:flex-start}.autosave{max-width:135px;text-align:right}.taskhead{display:block}.time{margin-top:8px}.btnrow .btn{flex:1}.chatrow{grid-template-columns:1fr}.chatrow .btn{width:100%}}
     @media print{body{background:#fff}.topbar,.btnrow,.footer,.progresswrap{display:none}.card{box-shadow:none;border:0}}
   </style>
 </head>
 <body>
   <main class="shell">
     <div class="topbar">
-      <div class="brand"><span class="mark">✦</span><span>创造性思维后测</span></div>
+      <div class="brand"><span class="mark">✦</span><span>创造性思维测评</span></div>
       <div class="autosave" id="saveState">尚未开始</div>
     </div>
 
     <section id="start" class="card hero">
-      <span class="eyebrow">五、六年级 · 研究用后测</span>
+      <span class="eyebrow">五、六年级 · 研究用测评</span>
       <h1>想法没有标准模样，<br>请写出你的独特思考。</h1>
-      <p class="lead">本测评包含开放题与物品多用途任务。请独立作答，不查资料；答案的数量、差异和新颖程度都可能被研究者分析。</p>
+      <p class="lead">本测评包含开放题、物品多用途任务，以及一道人机创造任务。前四题请独立完成；最后一题会随机进入“独立反思”或“AI协作”方式。</p>
       <div class="facts">
-        <div class="fact"><b>8</b><span>个任务</span></div>
-        <div class="fact"><b>每题 3–7 分钟</b><span>总上限约 38 分钟</span></div>
+        <div class="fact"><b>5</b><span>个任务</span></div>
+        <div class="fact"><b>每题 3–12 分钟</b><span>总上限约 30 分钟</span></div>
         <div class="fact"><b>自动暂存</b><span>本设备浏览器内保存</span></div>
       </div>
       <div class="formgrid">
@@ -86,7 +87,7 @@
       <div class="btnrow"><button class="btn ghost danger" id="clearData">清除本机暂存</button></div>
     </section>
 
-    <p class="footer">研究说明：本工具用于教育研究中的创造性思维后测，不是正式 PISA 或 OECD 测验。部分任务依据 PISA 2022 创造性思维公开题的构念与情境进行中文简化或改编，改编内容由研究者负责，OECD 不对本工具背书。答案提交至研究者管理的腾讯云 CloudBase；学生端仅允许新增记录，不能查询、修改或下载汇总数据。AUT 结果建议由至少两名评分者依据流畅性、灵活性、独创性与适切性编码。</p>
+    <p class="footer">研究说明：本工具用于教育研究中的创造性思维测评，不是正式 PISA 或 OECD 测验。部分任务依据 PISA 2022 创造性思维公开题的构念与情境进行中文简化或改编，改编内容由研究者负责，OECD 不对本工具背书。最后一题采用固定随机分组，同一学生刷新后仍保持原组别。答案与AI对话记录提交至研究者管理的腾讯云 CloudBase；请勿在答案或对话中填写姓名、手机号等个人信息。</p>
   </main>
   <div class="toast" id="toast"></div>
 
@@ -94,28 +95,32 @@
 <script>
 (function(){
   "use strict";
-  var KEY="creativity_posttest_v4";
+  var KEY="creativity_assessment_v5";
   var CLOUD_ENV="creativity-d6gaz98q82144e44e";
   var CLOUD_ACCESS_KEY="eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ3ODkzMjBhLWRiOWQtNDk5OS1hMDgyLWVkYzVjYmYzY2RiNSJ9.eyJpc3MiOiJodHRwczovL2NyZWF0aXZpdHktZDZnYXo5OHE4MjE0NGU0NGUuYXAtc2hhbmdoYWkudGNiLWFwaS50ZW5jZW50Y2xvdWRhcGkuY29tIiwic3ViIjoiYW5vbiIsImF1ZCI6ImNyZWF0aXZpdHktZDZnYXo5OHE4MjE0NGU0NGUiLCJleHAiOjQwOTE5NTI1NzMsImlhdCI6MTc4ODI2OTM3Mywibm9uY2UiOiJNOG10LWdOcFJocWVROXFUbHpBbHZRIiwiYXRfaGFzaCI6Ik04bXQtZ05wUmhxZVE5cVRsekFsdlEiLCJuYW1lIjoiQW5vbnltb3VzIiwic2NvcGUiOiJhbm9ueW1vdXMiLCJwcm9qZWN0X2lkIjoiY3JlYXRpdml0eS1kNmdhejk4cTgyMTQ0ZTQ0ZSIsIm1ldGEiOnsicGxhdGZvcm0iOiJQdWJsaXNoYWJsZUtleSJ9LCJyb2xlIjoiYW5vbiIsImlzX2Fub255bW91cyI6dHJ1ZSwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiYW5vbnltb3VzIiwicHJvdmlkZXJzIjpbImFub255bW91cyJdfSwidXNlcl9tZXRhZGF0YSI6eyJuYW1lIjoiQW5vbnltb3VzIn0sInVzZXJfdHlwZSI6IiIsImNsaWVudF90eXBlIjoiY2xpZW50X3VzZXIiLCJpc19zeXN0ZW1fYWRtaW4iOmZhbHNlfQ.BUOE-LR3VQCowe-IeYF8Oxm-X-dbwFEEfzNJyHOddEEiJKWW64YiecAqTFsPwJ77V8SDHfIstlydvPF4fwWmqeDtzvX9oGLW2Ao-BZwJ7-i-G-NfXOASV3XirHyXighCrmQopvgOzKMSVQhDvueld5RvHXcbtF419vNq0EmYlYJyNJ4zpReXgHIdX5VgzfvAxVvqC28aoqL2j_aoorC_q61K52K1OgYSlJ6_nsnAR-U1n2s7Ej5oLab0xqJF7Pnzxvj3HmnIcu_40I_O3elUSUsHS7QsSIqeWYw_Y51FtCABF7lhQ93Og3C7YBPnOOCVYih5fIYjAAeOYO8S894hhA";
   var COLLECTION="creativity_submissions";
+  var AI_MODEL_GROUP="cloudbase";
+  var AI_MODEL_NAME="deepseek-v4-flash";
   var tasks=[
-    {id:"anchor_2983",title:"数字故事：2983",tag:"前后测锚题 · 书面表达",mins:5,type:"text",prompt:"学校将举办一次创意故事展。请根据数字“2983”想出一个有趣而不同寻常的故事构想。用几句话说明故事发生了什么。",hint:"尽量写得清楚、完整，并让想法与常见答案有所不同。"},
-    {id:"anchor_carpooling",title:"让拼车方案更有效",tag:"前后测锚题 · 社会问题解决",mins:5,type:"text",prompt:"一座城市希望更多人拼车。现有方案是给拼车者提供燃油费或通行费折扣。请提出一种办法，使这个方案更有效、更有吸引力。不要只增加现金或折扣。",hint:"说明你的办法是什么，以及为什么可能有效。"},
-    {id:"parallel_robot",title:"机器人电影",tag:"平行任务 · 多样想法",mins:7,type:"ideas",minIdeas:3,maxIdeas:6,prompt:"一位电影导演要拍一部关于智能机器人的影片。请提出三个彼此明显不同的故事构想。",hint:"每一格写一个构想。重点是让三个故事在人物、冲突或结局等方面真正不同。"},
-    {id:"parallel_bees",title:"让大家认识蜜蜂",tag:"平行任务 · 社会问题解决",mins:5,type:"text",prompt:"学校自然社团希望让更多同学认识蜜蜂的重要性。请提出一个有创意、能吸引同学参与的活动方案。",hint:"说明活动怎样进行、同学们会做什么。"},
-    {id:"parallel_river_causes",title:"河边的青蛙",tag:"平行任务 · 科学问题解决",mins:5,type:"ideas",minIdeas:3,maxIdeas:6,prompt:"调查发现河边青蛙的数量明显减少。请提出三个彼此不同、可以进一步调查的原因。",hint:"每一格写一个原因。三个原因最好来自不同角度。"},
-    {id:"parallel_river_improve",title:"改进河水调查",tag:"平行任务 · 评价和改进",mins:5,type:"text",prompt:"同学们计划只取一瓶河水、观察颜色，来判断污染是否导致青蛙减少。请改进这个调查方案，使结论更可靠。",hint:"可以考虑取样、比较、测量或其他证据。"},
+    {id:"anchor_illustration_titles",title:"插图标题",tag:"锚题 · 产生多样想法",mins:5,type:"ideas",minIdeas:3,maxIdeas:3,prompt:"请为下面这幅插图写出三个彼此明显不同的标题。",hint:"标题可以关注不同事物，也可以用不同角度或表达方式理解这幅图。",figure:'<div class="stimulus"><svg viewBox="0 0 640 340" role="img" aria-label="一本巨大的书位于自然环境中"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dff5ef"/><stop offset="1" stop-color="#fff7dc"/></linearGradient></defs><rect width="640" height="340" rx="22" fill="url(#sky)"/><circle cx="532" cy="70" r="34" fill="#f2b84b" opacity=".8"/><path d="M0 238 Q130 178 265 236 T640 224 V340 H0Z" fill="#91c7a7"/><path d="M0 272 Q145 220 300 280 T640 265 V340 H0Z" fill="#4f9d88"/><path d="M145 250 Q235 188 320 246 Q407 188 500 250 L475 304 Q397 274 320 311 Q242 274 166 304Z" fill="#fffdf7" stroke="#126e68" stroke-width="7"/><path d="M320 246 V311" stroke="#126e68" stroke-width="5"/><path d="M314 235 C296 188 301 142 326 101 C351 143 357 188 326 237Z" fill="#58a99f"/><path d="M326 161 C283 150 260 124 251 90 C291 92 319 113 326 161Z" fill="#7ec3a6"/><path d="M326 179 C370 164 398 136 409 99 C367 102 338 128 326 179Z" fill="#6db58f"/><g fill="#fff"><circle cx="88" cy="82" r="20"/><circle cx="111" cy="73" r="27"/><circle cx="139" cy="84" r="20"/></g></svg></div>'},
+    {id:"anchor_2983",title:"数字故事：2983",tag:"锚题 · 产生创造性想法",mins:5,type:"text",prompt:"学校将举办一次创意故事展。请根据数字“2983”想出一个有趣而不同寻常的故事构想。用几句话说明故事发生了什么，并让数字2983成为故事中的重要内容。",hint:"尽量写得清楚、完整，并让想法与常见答案有所不同。"},
+    {id:"anchor_library_improve",title:"改进无障碍图书馆",tag:"锚题 · 评价和改进想法",mins:5,type:"text",prompt:"图书馆准备安装坡道，帮助使用轮椅的人进入不同区域。请为这个坡道增加一种有创意的改进或功能，使轮椅使用者更方便、安全地取阅图书。",hint:"不要只写“安装普通自动坡道”。请说明新增功能是什么，以及它怎样提供帮助。"},
     {id:"aut_cup",title:"纸杯的新用途",tag:"AUT · 发散思维",mins:3,type:"ideas",minIdeas:4,maxIdeas:10,prompt:"纸杯除了用来喝水，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。不要只换一种饮料；用途越多样越好。"},
-    {id:"aut_box",title:"纸盒的新用途",tag:"AUT · 发散思维",mins:3,type:"ideas",minIdeas:4,maxIdeas:10,prompt:"纸盒除了装东西，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。答案要能说得通，也可以大胆想象。"}
+    {id:"human_ai_bunny",title:"改进毛绒兔玩具",tag:"随机任务 · 人机创造",mins:12,type:"collaboration",prompt:"请提出一个最佳改进方案，使普通的毛绒兔玩具更加有趣、有创意，同时适合儿童安全地使用。",hint:"先写出自己的想法；随后系统会按随机分组，引导你独立反思或与AI对话，最后形成完整方案。"}
   ];
-  var state={meta:{},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,startedAt:null,submittedAt:null};
-  var timer=null,lastTick=null,advancing=false;
+  var state={meta:{},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,condition:null,startedAt:null,submittedAt:null};
+  var timer=null,lastTick=null,advancing=false,aiBusy=false,cloudApp=null;
   function el(id){return document.getElementById(id)}
   function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]})}
   function show(which){["start","test","finish"].forEach(function(id){el(id).classList.toggle("hidden",id!==which)})}
   function toast(msg){el("toast").textContent=msg;el("toast").classList.add("show");setTimeout(function(){el("toast").classList.remove("show")},1600)}
   function save(){localStorage.setItem(KEY,JSON.stringify(state));el("saveState").textContent="已自动保存 · "+new Date().toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});}
-  function load(){try{var x=JSON.parse(localStorage.getItem(KEY));if(x&&x.answers){state=x;state.taskStarted=state.taskStarted||{};state.taskDeadline=state.taskDeadline||{};state.taskSeconds=state.taskSeconds||{};return true}}catch(e){}return false}
+  function load(){try{var x=JSON.parse(localStorage.getItem(KEY));if(x&&x.answers){state=x;state.taskStarted=state.taskStarted||{};state.taskDeadline=state.taskDeadline||{};state.taskSeconds=state.taskSeconds||{};state.condition=state.condition||assignCondition(state.meta.studentId,state.meta.classCode);return true}}catch(e){}return false}
+  function assignCondition(studentId,classCode){
+    var s="v5|"+String(classCode||"")+"|"+String(studentId||""),h=2166136261;
+    for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}
+    return (h>>>0)%2===0?"reflection":"ai";
+  }
   function uniqCount(a){var seen={};return (a||[]).filter(function(x){var k=String(x).trim().toLowerCase();if(!k||seen[k])return false;seen[k]=1;return true}).length}
   function secondsTotal(){return Math.max(0,Math.round((Date.now()-new Date(state.startedAt).getTime())/1000))}
   function fmt(n){n=Math.max(0,n||0);return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
@@ -137,7 +142,7 @@
     var sid=el("studentId").value.trim(),grade=el("grade").value,cc=el("classCode").value.trim();
     if(!sid||!grade||!cc){toast("请填写编号、年级和班级代码");return}
     if(!el("consent").checked){toast("请先阅读并勾选说明");return}
-    state={meta:{studentId:sid,grade:grade,classCode:cc},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,startedAt:new Date().toISOString(),submittedAt:null};
+    state={meta:{studentId:sid,grade:grade,classCode:cc},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,condition:assignCondition(sid,cc),startedAt:new Date().toISOString(),submittedAt:null};
     save();show("test");render();startTimer();
   }
   function render(){
@@ -145,36 +150,104 @@
     el("stepText").textContent="第 "+(state.current+1)+" 题 / 共 "+tasks.length+" 题";
     el("bar").style.width=((state.current+1)/tasks.length*100)+"%";
     el("taskTag").textContent=t.tag;el("taskTitle").textContent=t.title;
-    el("prompt").textContent=t.prompt;el("hint").textContent=t.hint;el("elapsed").textContent=fmt(secondsTotal());
+    el("prompt").innerHTML=(t.figure||"")+"<div>"+esc(t.prompt)+"</div>";el("hint").textContent=t.hint;el("elapsed").textContent=fmt(secondsTotal());
     var area=el("answerArea");area.innerHTML="";
     if(t.type==="text"){
       var ta=document.createElement("textarea");ta.className="answer";ta.id="singleAnswer";ta.placeholder="请在这里输入你的回答……";ta.value=state.answers[t.id]||"";ta.addEventListener("input",debouncedSave);area.appendChild(ta);
-    }else{
+    }else if(t.type==="ideas"){
       var vals=Array.isArray(state.answers[t.id])?state.answers[t.id].slice():[];
       while(vals.length<t.minIdeas)vals.push("");
       var box=document.createElement("div");box.className="ideas";box.id="ideaBox";
       vals.forEach(function(v,i){box.appendChild(ideaRow(i,v))});area.appendChild(box);
-      var add=document.createElement("button");add.type="button";add.className="add";add.textContent="+ 再添加一个想法";add.onclick=function(){capture();var arr=state.answers[t.id]||[];if(arr.length>=t.maxIdeas){toast("本题最多填写 "+t.maxIdeas+" 条");return}arr.push("");state.answers[t.id]=arr;render();setTimeout(function(){var ins=document.querySelectorAll(".idea");ins[ins.length-1].focus()},0)};area.appendChild(add);
+      if(t.maxIdeas>t.minIdeas){var add=document.createElement("button");add.type="button";add.className="add";add.textContent="+ 再添加一个想法";add.onclick=function(){capture();var arr=state.answers[t.id]||[];if(arr.length>=t.maxIdeas){toast("本题最多填写 "+t.maxIdeas+" 条");return}arr.push("");state.answers[t.id]=arr;render();setTimeout(function(){var ins=document.querySelectorAll(".idea");ins[ins.length-1].focus()},0)};area.appendChild(add)}
+    }else if(t.type==="collaboration"){
+      renderCollaboration(area,t);
     }
     el("next").textContent=state.current===tasks.length-1?"完成并检查":"保存并下一题";updateCountdown();save();
   }
+  function collaborationAnswer(t){
+    var a=state.answers[t.id];
+    if(!a||typeof a!=="object"||Array.isArray(a))a={};
+    a.initialIdeas=Array.isArray(a.initialIdeas)?a.initialIdeas:["",""];
+    while(a.initialIdeas.length<2)a.initialIdeas.push("");
+    a.selectedIdea=a.selectedIdea||"";a.reflection=a.reflection||{weakness:"",improvement:""};a.chat=Array.isArray(a.chat)?a.chat:[];a.finalAnswer=a.finalAnswer||"";a.aiError=a.aiError||"";
+    state.answers[t.id]=a;return a;
+  }
+  function renderCollaboration(area,t){
+    var a=collaborationAnswer(t),isAi=state.condition==="ai",chatHtml=a.chat.length?a.chat.map(function(m){return '<div class="msg '+(m.role==="assistant"?"ai":"user")+'">'+esc(m.content)+"</div>"}).join(""):'<div class="chatempty">还没有对话。先把自己的想法写在上面，再向AI提问。</div>';
+    var middle=isAi?'<div class="stage"><span class="condition">AI协作方式</span><h3 style="margin-top:12px">第二步：与AI讨论</h3><p>把自己的想法告诉AI，请它指出不足、比较方案或帮助改进。你需要自己判断是否接受建议。</p><div class="chatbox" id="chatBox">'+chatHtml+'</div><div class="chatrow"><input id="chatInput" maxlength="500" placeholder="例如：这是我的想法……请指出一个不足，并给我两种改进方向"><button type="button" class="btn primary" id="sendAi">发送</button></div>'+(a.aiError?'<div class="aiwarn">AI暂时未能回复：'+esc(a.aiError)+'</div>':"")+'</div>':'<div class="stage"><span class="condition">独立反思方式</span><h3 style="margin-top:12px">第二步：自己检查和改进</h3><p>不使用AI，独立检查自己的方案，再把它发展得更完整。</p><div class="reflection-grid"><label><span class="mini-label">这个想法目前最大的不足是什么？</span><textarea class="answer" id="reflectionWeakness" style="min-height:90px">'+esc(a.reflection.weakness)+'</textarea></label><label><span class="mini-label">你准备怎样修改或完善它？</span><textarea class="answer" id="reflectionImprovement" style="min-height:90px">'+esc(a.reflection.improvement)+'</textarea></label></div></div>';
+    area.innerHTML='<div class="collab"><div class="stage"><h3>第一步：先独立构思</h3><p>在使用任何帮助之前，先写出两个初步想法，并选出一个继续发展。</p><div class="twocol"><label><span class="mini-label">初步想法1</span><textarea class="answer collabInitial" data-index="0" style="min-height:100px">'+esc(a.initialIdeas[0])+'</textarea></label><label><span class="mini-label">初步想法2</span><textarea class="answer collabInitial" data-index="1" style="min-height:100px">'+esc(a.initialIdeas[1])+'</textarea></label></div><label><span class="mini-label" style="margin-top:10px">选择一个最值得继续发展的想法</span><textarea class="answer" id="selectedIdea" style="min-height:100px">'+esc(a.selectedIdea)+'</textarea></label></div>'+middle+'<div class="stage"><h3>第三步：形成最终方案</h3><p>请用自己的语言写出最终方案，包括具体改动、使用方式，以及它为什么有趣且可行。</p><textarea class="answer finalanswer" id="finalAnswer" placeholder="请在这里写最终方案……">'+esc(a.finalAnswer)+'</textarea></div></div>';
+    Array.prototype.forEach.call(area.querySelectorAll("textarea,input"),function(x){if(x.id!=="chatInput")x.addEventListener("input",debouncedSave)});
+    if(isAi){var send=el("sendAi");send.disabled=aiBusy;send.textContent=aiBusy?"AI思考中……":"发送";send.onclick=sendAiMessage;var cb=el("chatBox");cb.scrollTop=cb.scrollHeight}
+  }
+  function getCloudApp(){
+    if(cloudApp)return cloudApp;
+    if(!window.cloudbase)throw new Error("CloudBase SDK 未加载");
+    cloudApp=window.cloudbase.init({env:CLOUD_ENV,region:"ap-shanghai",accessKey:CLOUD_ACCESS_KEY});return cloudApp;
+  }
+  async function sendAiMessage(){
+    if(aiBusy)return;capture();var t=tasks[state.current],a=collaborationAnswer(t),input=el("chatInput"),message=input?input.value.trim():"";
+    if(!message){toast("请先输入想和AI讨论的内容");return}
+    if(!a.selectedIdea.trim()){toast("请先写出你选择的初步想法");return}
+    if(a.chat.filter(function(m){return m.role==="user"}).length>=8){toast("本题最多进行8轮提问，请整理最终方案");return}
+    a.chat.push({role:"user",content:message,at:new Date().toISOString()});a.aiError="";aiBusy=true;save();render();
+    try{
+      var model=getCloudApp().ai().createModel(AI_MODEL_GROUP);
+      var system="你是面向小学五、六年级学生的创造性思维伙伴。任务是帮助学生改进毛绒兔玩具。不要代替学生直接给出完整最终答案；优先追问、指出一个具体不足、提供至多两个可选择的方向，并邀请学生判断。语言友好、简短，每次不超过140个汉字。不得索要或复述任何个人信息。";
+      var context="任务：改进普通毛绒兔玩具，使它更有趣、有创意、安全且可行。学生的初步想法：1."+a.initialIdeas[0]+"；2."+a.initialIdeas[1]+"。学生选择继续发展的想法："+a.selectedIdea;
+      var messages=[{role:"system",content:system},{role:"user",content:context}].concat(a.chat.slice(-12).map(function(m){return{role:m.role,content:m.content}}));
+      var result=await model.generateText({model:AI_MODEL_NAME,messages:messages});
+      var reply=result&&result.text?String(result.text).trim():"";if(!reply)throw new Error("没有收到有效回复");
+      a.chat.push({role:"assistant",content:reply,at:new Date().toISOString(),model:AI_MODEL_NAME});
+    }catch(err){console.error(err);a.aiError=String((err&&err.message)||err||"服务不可用").slice(0,180)}
+    aiBusy=false;save();render();
+  }
   function ideaRow(i,v){var row=document.createElement("div");row.className="idearow";var n=document.createElement("span");n.className="num";n.textContent=i+1;var inp=document.createElement("input");inp.className="idea";inp.placeholder="想法 "+(i+1);inp.value=v;inp.addEventListener("input",debouncedSave);row.appendChild(n);row.appendChild(inp);return row}
   var debounce=null;function debouncedSave(){clearTimeout(debounce);debounce=setTimeout(function(){capture();save()},350)}
-  function capture(){var t=tasks[state.current];if(t.type==="text"){var a=el("singleAnswer");if(a)state.answers[t.id]=a.value.trim()}else{state.answers[t.id]=Array.prototype.map.call(document.querySelectorAll(".idea"),function(x){return x.value.trim()})}}
+  function capture(){
+    var t=tasks[state.current];
+    if(t.type==="text"){var a=el("singleAnswer");if(a)state.answers[t.id]=a.value.trim()}
+    else if(t.type==="ideas"){state.answers[t.id]=Array.prototype.map.call(document.querySelectorAll(".idea"),function(x){return x.value.trim()})}
+    else if(t.type==="collaboration"){
+      var c=collaborationAnswer(t),initial=document.querySelectorAll(".collabInitial");
+      if(initial.length)c.initialIdeas=Array.prototype.map.call(initial,function(x){return x.value.trim()});
+      if(el("selectedIdea"))c.selectedIdea=el("selectedIdea").value.trim();
+      if(el("reflectionWeakness"))c.reflection.weakness=el("reflectionWeakness").value.trim();
+      if(el("reflectionImprovement"))c.reflection.improvement=el("reflectionImprovement").value.trim();
+      if(el("finalAnswer"))c.finalAnswer=el("finalAnswer").value.trim();
+      state.answers[t.id]=c;
+    }
+  }
   function go(){capture();save();if(state.current===tasks.length-1){finish();return}state.current+=1;render()}
-  function finish(){clearInterval(timer);show("finish");var done=tasks.filter(function(t){var a=state.answers[t.id];return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}).length;el("summary").innerHTML="<b>"+esc(state.meta.studentId)+"</b> 已完成 "+done+" / "+tasks.length+" 题，累计用时 "+fmt(secondsTotal())+"。请检查后统一提交。";
+  function hasResponse(t,a){if(t.type==="collaboration")return !!(a&&a.finalAnswer&&a.finalAnswer.trim());return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}
+  function answerText(t,a){
+    if(t.type==="collaboration"){
+      a=a||{};var lines=["随机方式："+(state.condition==="ai"?"AI协作":"独立反思"),"初步想法："+((a.initialIdeas||[]).filter(Boolean).join("；")||"（未填写）"),"选定想法："+(a.selectedIdea||"（未填写）")];
+      if(state.condition==="ai")lines.push("AI对话："+((a.chat||[]).map(function(m){return(m.role==="assistant"?"AI":"学生")+"："+m.content}).join("\n")||"（无对话）"));
+      else lines.push("发现的不足："+((a.reflection&&a.reflection.weakness)||"（未填写）"),"改进思路："+((a.reflection&&a.reflection.improvement)||"（未填写）"));
+      lines.push("最终方案："+(a.finalAnswer||"（未作答）"));return lines.join("\n");
+    }
+    return Array.isArray(a)?a.filter(Boolean).map(function(x,j){return(j+1)+". "+x}).join("\n"):(a||"");
+  }
+  function finish(){clearInterval(timer);show("finish");var done=tasks.filter(function(t){return hasResponse(t,state.answers[t.id])}).length;el("summary").innerHTML="<b>"+esc(state.meta.studentId)+"</b> 已完成 "+done+" / "+tasks.length+" 题，累计用时 "+fmt(secondsTotal())+"。最后一题采用“"+(state.condition==="ai"?"AI协作":"独立反思")+"”方式。请检查后统一提交。";
     if(state.cloudSubmissionId){showSubmitted(state.cloudSubmissionId)}
-    el("review").innerHTML=tasks.map(function(t,i){var a=state.answers[t.id],txt=Array.isArray(a)?a.filter(Boolean).map(function(x,j){return (j+1)+". "+x}).join("\n"):(a||"");return '<div class="reviewitem"><b>'+(i+1)+". "+esc(t.title)+'</b><div>'+esc(txt||"（未作答）")+"</div></div>"}).join("");
+    el("review").innerHTML=tasks.map(function(t,i){var txt=answerText(t,state.answers[t.id]);return '<div class="reviewitem"><b>'+(i+1)+". "+esc(t.title)+'</b><div>'+esc(txt||"（未作答）")+"</div></div>"}).join("");
   }
   function csvCell(x){var s=String(x==null?"":x);return '"'+s.replace(/"/g,'""')+'"'}
   function rowData(){
-    var o={student_id:state.meta.studentId,grade:state.meta.grade,class_code:state.meta.classCode,started_at:state.startedAt,submitted_at:state.submittedAt,total_seconds:secondsTotal()};
-    tasks.forEach(function(t){var a=state.answers[t.id];o[t.id+"_response"]=Array.isArray(a)?a.filter(Boolean).join(" | "):(a||"");o[t.id+"_seconds"]=state.taskSeconds[t.id]||0;if(t.type==="ideas")o[t.id+"_fluency_unique"]=uniqCount(a);o[t.id+"_flexibility_human"]="";o[t.id+"_originality_human"]="";o[t.id+"_appropriateness_human"]="";});
+    var o={student_id:state.meta.studentId,grade:state.meta.grade,class_code:state.meta.classCode,condition:state.condition,started_at:state.startedAt,submitted_at:state.submittedAt,total_seconds:secondsTotal()};
+    tasks.forEach(function(t){
+      var a=state.answers[t.id];
+      if(t.type==="collaboration"){
+        a=a||{};o[t.id+"_response"]=a.finalAnswer||"";o[t.id+"_initial_ideas"]=(a.initialIdeas||[]).filter(Boolean).join(" | ");o[t.id+"_selected_idea"]=a.selectedIdea||"";o[t.id+"_condition"]=state.condition;o[t.id+"_reflection_weakness"]=(a.reflection&&a.reflection.weakness)||"";o[t.id+"_reflection_improvement"]=(a.reflection&&a.reflection.improvement)||"";o[t.id+"_chat_json"]=JSON.stringify(a.chat||[]);o[t.id+"_ai_error"]=a.aiError||"";
+      }else{o[t.id+"_response"]=Array.isArray(a)?a.filter(Boolean).join(" | "):(a||"");if(t.type==="ideas")o[t.id+"_fluency_unique"]=uniqCount(a)}
+      o[t.id+"_seconds"]=state.taskSeconds[t.id]||0;o[t.id+"_flexibility_human"]="";o[t.id+"_originality_human"]="";o[t.id+"_appropriateness_human"]="";
+    });
     return o;
   }
   function download(name,type,text){var blob=new Blob(["\ufeff"+text],{type:type});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url)},500)}
   function dlCsv(){capture();var o=rowData(),heads=Object.keys(o),line=heads.map(function(k){return csvCell(o[k])}).join(",");download("creativity_"+safeName(state.meta.studentId)+".csv","text/csv;charset=utf-8",heads.join(",")+"\n"+line)}
-  function dlJson(){download("creativity_"+safeName(state.meta.studentId)+".json","application/json;charset=utf-8",JSON.stringify({instrument:"creativity_posttest_v1",exportedAt:new Date().toISOString(),data:rowData(),raw:state},null,2))}
+  function dlJson(){download("creativity_"+safeName(state.meta.studentId)+".json","application/json;charset=utf-8",JSON.stringify({instrument:"creativity_assessment_v5_randomized_ai",exportedAt:new Date().toISOString(),data:rowData(),raw:state},null,2))}
   function safeName(s){return String(s||"student").replace(/[^a-zA-Z0-9_-]/g,"_")}
   el("begin").onclick=begin;
   el("resume").onclick=function(){if(!load()){toast("没有找到上次记录");return}el("studentId").value=state.meta.studentId||"";el("grade").value=state.meta.grade||"";el("classCode").value=state.meta.classCode||"";show("test");render();startTimer()};
@@ -182,15 +255,14 @@
   el("submitCloud").onclick=submitCloud;
   async function submitCloud(){
     if(state.cloudSubmissionId){toast("这份答案已经提交");return}
-    var completed=tasks.filter(function(t){var a=state.answers[t.id];return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}).length;
+    var completed=tasks.filter(function(t){return hasResponse(t,state.answers[t.id])}).length;
     if(completed<tasks.length&&!confirm("还有 "+(tasks.length-completed)+" 题未作答，仍然提交吗？"))return;
     var btn=el("submitCloud"),status=el("submitStatus");btn.disabled=true;btn.textContent="正在安全提交……";status.classList.remove("hidden");status.textContent="正在连接研究数据库，请不要关闭页面。";
     try{
-      if(!window.cloudbase)throw new Error("CloudBase SDK 未加载");
-      var app=window.cloudbase.init({env:CLOUD_ENV,region:"ap-shanghai",accessKey:CLOUD_ACCESS_KEY});
+      var app=getCloudApp();
       state.submittedAt=new Date().toISOString();
       var payload=rowData();
-      payload.instrument_version="creativity_posttest_v4_timed";
+      payload.instrument_version="creativity_assessment_v5_randomized_ai";
       payload.client_submitted_at=state.submittedAt;
       payload.user_agent=navigator.userAgent.slice(0,300);
       var row={
