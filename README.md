@@ -20,9 +20,19 @@
 
 ## AI 配置
 
-网页通过现有 CloudBase Publishable Key 调用 `cloudbase` 模型组中的 `deepseek-v4-flash`。正式施测前，需要在腾讯云 CloudBase 控制台的“AI → 生文模型”中启用该模型，并进行一次完整对话测试。若环境中使用其他模型，可修改 `index.html` 中的 `AI_MODEL_GROUP` 和 `AI_MODEL_NAME`。
+网页通过现有 CloudBase Publishable Key 调用 `cloudbase` 模型组中的 `hy3`。正式施测前，需要在腾讯云 CloudBase 控制台的“AI → 生文模型”中启用该模型，并进行一次完整对话测试。若环境中使用其他模型，可修改 `index.html` 中的 `AI_MODEL_GROUP` 和 `AI_MODEL_NAME`。
 
 AI 只用于最后一题的协作讨论。系统提示要求 AI 不直接代写最终答案，而是提出问题、指出不足并提供少量改进方向。页面明确提醒学生不要输入姓名、手机号等个人信息。
+
+## 修改题目文案与图片
+
+- 首页标题、总体说明、限时规则和知情说明位于根目录 `index.html` 的 `<section id="start">` 区域。
+- 五道题的标题、维度标签、限时、题干和提示语位于 `index.html` 中带有“题目文案编辑区”注释的 `tasks` 数组。
+- 题目图片路径位于紧随 `tasks` 数组之后的“题目图片编辑区”。
+- 图片文件放在 `assets/images/`；当前漫画标题题使用 `comic-title.png`，2983 题使用 `story-2983.png`。
+- 每次修改根目录 `index.html` 或 `assets/` 后，还需要把相同内容同步到 `dist/index.html` 和 `dist/assets/`，CloudBase 部署使用的是 `dist/` 目录。
+
+不要修改 CloudBase 环境编号、Publishable Key、数据库集合名称、随机分组函数或 AI 模型配置，除非同时重新测试数据提交和 AI 对话。
 
 ## 数据回收
 
