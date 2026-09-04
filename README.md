@@ -38,6 +38,8 @@ AI 只用于最后一题的协作讨论。系统提示要求 AI 不直接代写�
 
 学生完成后通过网页统一提交至腾讯云 CloudBase PostgreSQL 表 `public.creativity_submissions`。学生端只被授予 `INSERT` 权限，并且没有 `SELECT`、`UPDATE` 或 `DELETE` 权限，因此不能查看、修改或下载汇总结果。研究者通过自己的腾讯云账号查看并导出数据。
 
+每次提交的 `payload` 字段包含五道题全部答案、每题用时、随机分组、完整 AI 对话（学生和 AI 的每条消息、时间和模型）、独立反思内容以及完整答案 JSON。为了方便直接导出为一题一列的数据表，可在 CloudBase SQL 编辑器运行 `db_export_view.sql`，之后导出视图 `public.creativity_submissions_export`。
+
 前端使用权限受限的 Publishable Key（`anon` 角色），不得使用服务端 API Key 或 `service_role` 密钥。Web 安全域名应包含 `xiajing819195798-sys.github.io`。
 
 正式施测前请完成知情同意、预测试、评分员培训、AI 模型启用检查和提交演练。班级代码建议代表学生归属班级，教师轮转信息另建教师—班级—时段对应表，不要在学生答题或 AI 对话中存储姓名。

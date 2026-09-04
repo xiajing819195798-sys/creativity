@@ -35,20 +35,20 @@
 
     <!-- 首页文案编辑区：标题、说明、任务数量和知情说明都在下面。 -->
     <section id="start" class="card hero">
-      <span class="eyebrow">五、六年级 · 研究用测评</span>
+      <span class="eyebrow">研究测评</span>
       <h1>想法没有标准模样，<br>请写出你的独特思考。</h1>
-      <p class="lead">本测评包含开放题、物品多用途任务，以及一道人机创造任务。前四题请独立完成；最后一题会随机进入“独立反思”或“AI协作”方式。</p>
+      <p class="lead">本测评包含开放题。前四题请独立完成；最后一题每位同学会有不同</p>
       <div class="facts">
         <div class="fact"><b>5</b><span>个任务</span></div>
-        <div class="fact"><b>每题 3–12 分钟</b><span>总上限约 30 分钟</span></div>
+        <div class="fact"><b>每题 3–10 分钟</b><span>总上限约25分钟</span></div>
         <div class="fact"><b>自动暂存</b><span>本设备浏览器内保存</span></div>
       </div>
       <div class="formgrid">
-        <div class="field"><label for="studentId">匿名学生编号</label><input id="studentId" maxlength="30" autocomplete="off" placeholder="例如：A05-16"></div>
-        <div class="field"><label for="grade">年级</label><select id="grade"><option value="">请选择</option><option value="5">五年级</option><option value="6">六年级</option></select></div>
-        <div class="field"><label for="classCode">班级代码</label><input id="classCode" maxlength="20" autocomplete="off" placeholder="例如：501"></div>
+        <div class="field"><label for="studentId">填写你的学号</label><input id="studentId" maxlength="30" autocomplete="off" placeholder="例如：20250601"></div>
+        <div class="field"><label for="grade">年级</label><select id="grade"><option value="">请选择</option><option value="5">五年级</option><option value="6">六年级</option><option value="7">七年级</option><option value="8">八年级</option></select></div>
+        <div class="field"><label for="classCode">班级</label><input id="classCode" maxlength="20" autocomplete="off" placeholder="例如：1班就填写1"></div>
       </div>
-      <div class="notice"><b>限时规则：</b>进入每道题后开始倒计时；时间到会自动保存并进入下一题，进入下一题后不能返回。刷新或关闭网页不会重置当前题时间。</div><label class="consent"><input type="checkbox" id="consent"><span>老师已向我说明测评用途和限时规则。我知道参加不影响学业成绩，可以按真实想法作答。请不要填写姓名、手机号等个人信息。</span></label>
+      <div class="notice"><b>限时规则：</b>进入每道题后开始倒计时；时间到会自动保存并进入下一题，进入下一题后不能返回。刷新或关闭网页不会重置当前题时间。</div><label class="consent"><input type="checkbox" id="consent"><span>老师已向我说明测评用途和限时规则。可以按真实想法作答。</span></label>
       <div class="btnrow">
         <button class="btn primary" id="begin">开始作答</button>
         <button class="btn ghost" id="resume">继续上次作答</button>
@@ -78,17 +78,17 @@
     <section id="finish" class="card hidden">
       <span class="eyebrow">提交前检查</span>
       <h2>你的答案已保存在这台设备上</h2>
-      <p class="lead">请核对作答记录。限时作答已结束，不能返回修改；确认后点击“统一提交”。答案将发送到研究者的腾讯云数据库，学生端无法查看其他人的数据。</p>
+      <p class="lead">请核对作答记录。限时作答已结束，不能返回修改；确认后点击“统一提交”。</p>
       <div class="notice" id="summary"></div>
       <div class="review" id="review"></div>
       <div class="btnrow">
-        <button class="btn primary" id="submitCloud">统一提交给研究者</button>
+        <button class="btn primary" id="submitCloud">统一提交</button>
       </div>
       <div class="notice hidden" id="submitStatus" style="margin-top:16px"></div>
       <div class="btnrow"><button class="btn ghost danger" id="clearData">清除本机暂存</button></div>
     </section>
 
-    <p class="footer">研究说明：本工具用于教育研究中的创造性思维测评，不是正式 PISA 或 OECD 测验。部分任务依据 PISA 2022 创造性思维公开题的构念与情境进行中文简化或改编，改编内容由研究者负责，OECD 不对本工具背书。最后一题采用固定随机分组，同一学生刷新后仍保持原组别。答案与AI对话记录提交至研究者管理的腾讯云 CloudBase；请勿在答案或对话中填写姓名、手机号等个人信息。</p>
+    <p class="footer">研究说明：本工具仅用于教育研究中的创造性思维测评，测评结果全程保密，请同学们认真填写。</p>
   </main>
   <div class="toast" id="toast"></div>
 
@@ -108,7 +108,7 @@
     {id:"anchor_2983",title:"数字故事：2983",tag:"锚题 · 产生创造性想法",mins:5,type:"text",prompt:"学校将举办一次创意故事展。请根据数字“2983”想出一个有趣而不同寻常的故事构想。用几句话说明故事发生了什么，并让数字2983成为故事中的重要内容。",hint:"尽量写得清楚、完整，并让想法与常见答案有所不同。"},
     {id:"anchor_library_improve",title:"改进无障碍图书馆",tag:"锚题 · 评价和改进想法",mins:5,type:"text",prompt:"图书馆准备安装坡道，帮助使用轮椅的人进入不同区域。请为这个坡道增加一种有创意的改进或功能，使轮椅使用者更方便、安全地取阅图书。",hint:"不要只写“安装普通自动坡道”。请说明新增功能是什么，以及它怎样提供帮助。"},
     {id:"aut_cup",title:"纸杯的新用途",tag:"AUT · 发散思维",mins:3,type:"ideas",minIdeas:4,maxIdeas:10,prompt:"纸杯除了用来喝水，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。不要只换一种饮料；用途越多样越好。"},
-    {id:"human_ai_bunny",title:"改进毛绒兔玩具",tag:"随机任务 · 人机创造",mins:12,type:"collaboration",prompt:"请提出一个最佳改进方案，使普通的毛绒兔玩具更加有趣、有创意，同时适合儿童安全地使用。",hint:"先写出自己的想法；随后系统会按随机分组，引导你独立反思或与AI对话，最后形成完整方案。"}
+    {id:"human_ai_bunny",title:"改进毛绒兔玩具",tag:"随机任务 · 人机创造",mins:10,type:"collaboration",prompt:"请提出一个最佳改进方案，使普通的毛绒兔玩具更加有趣、有创意，同时适合儿童安全地使用。",hint:"先写出自己的想法；随后系统会按随机分组，引导你独立反思或与AI对话，最后形成完整方案。"}
   ];
   // ===== 题目图片编辑区：图片文件放在 assets/images/，修改 src 即可更换。 =====
   tasks[0].figure='<div class="stimulus"><img src="assets/images/comic-title.png" alt="漫画标题题目图片：灯泡中的地球"></div>';
@@ -198,7 +198,7 @@
     a.chat.push({role:"user",content:message,at:new Date().toISOString()});a.aiError="";aiBusy=true;save();render();
     try{
       var model=getCloudApp().ai().createModel(AI_MODEL_GROUP);
-      var system="你是面向小学五、六年级学生的创造性思维伙伴。任务是帮助学生改进毛绒兔玩具。不要代替学生直接给出完整最终答案；优先追问、指出一个具体不足、提供至多两个可选择的方向，并邀请学生判断。语言友好、简短，每次不超过140个汉字。不得索要或复述任何个人信息。";
+      var system="你是面向五至八年级学生的创造性思维伙伴。任务是帮助学生改进毛绒兔玩具。不要代替学生直接给出完整最终答案；优先追问、指出一个具体不足、提供至多两个可选择的方向，并邀请学生判断。语言友好、简短，每次不超过140个汉字。不得索要或复述任何个人信息。";
       var context="任务：改进普通毛绒兔玩具，使它更有趣、有创意、安全且可行。学生的初步想法：1."+a.initialIdeas[0]+"；2."+a.initialIdeas[1]+"。学生选择继续发展的想法："+a.selectedIdea;
       var messages=[{role:"system",content:system},{role:"user",content:context}].concat(a.chat.slice(-12).map(function(m){return{role:m.role,content:m.content}}));
       var result=await model.generateText({model:AI_MODEL_NAME,messages:messages});
@@ -248,11 +248,19 @@
       }else{o[t.id+"_response"]=Array.isArray(a)?a.filter(Boolean).join(" | "):(a||"");if(t.type==="ideas")o[t.id+"_fluency_unique"]=uniqCount(a)}
       o[t.id+"_seconds"]=state.taskSeconds[t.id]||0;o[t.id+"_flexibility_human"]="";o[t.id+"_originality_human"]="";o[t.id+"_appropriateness_human"]="";
     });
+    var collab=state.answers.human_ai_bunny||{},chat=Array.isArray(collab.chat)?collab.chat:[];
+    o.completed_tasks=tasks.filter(function(t){return hasResponse(t,state.answers[t.id])}).length;
+    o.answers_json=JSON.stringify(state.answers||{});
+    o.task_started_json=JSON.stringify(state.taskStarted||{});
+    o.task_seconds_json=JSON.stringify(state.taskSeconds||{});
+    o.ai_chat_json=JSON.stringify(chat);
+    o.ai_message_count=chat.length;
+    o.ai_user_message_count=chat.filter(function(m){return m.role==="user"}).length;
     return o;
   }
   function download(name,type,text){var blob=new Blob(["\ufeff"+text],{type:type});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url)},500)}
   function dlCsv(){capture();var o=rowData(),heads=Object.keys(o),line=heads.map(function(k){return csvCell(o[k])}).join(",");download("creativity_"+safeName(state.meta.studentId)+".csv","text/csv;charset=utf-8",heads.join(",")+"\n"+line)}
-  function dlJson(){download("creativity_"+safeName(state.meta.studentId)+".json","application/json;charset=utf-8",JSON.stringify({instrument:"creativity_assessment_v5_randomized_ai",exportedAt:new Date().toISOString(),data:rowData(),raw:state},null,2))}
+  function dlJson(){download("creativity_"+safeName(state.meta.studentId)+".json","application/json;charset=utf-8",JSON.stringify({instrument:"creativity_assessment_v6_complete_data",exportedAt:new Date().toISOString(),data:rowData(),raw:state},null,2))}
   function safeName(s){return String(s||"student").replace(/[^a-zA-Z0-9_-]/g,"_")}
   el("begin").onclick=begin;
   el("resume").onclick=function(){if(!load()){toast("没有找到上次记录");return}el("studentId").value=state.meta.studentId||"";el("grade").value=state.meta.grade||"";el("classCode").value=state.meta.classCode||"";show("test");render();startTimer()};
@@ -267,7 +275,7 @@
       var app=getCloudApp();
       state.submittedAt=new Date().toISOString();
       var payload=rowData();
-      payload.instrument_version="creativity_assessment_v5_randomized_ai";
+      payload.instrument_version="creativity_assessment_v6_complete_data";
       payload.client_submitted_at=state.submittedAt;
       payload.user_agent=navigator.userAgent.slice(0,300);
       var row={
