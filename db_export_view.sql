@@ -51,8 +51,15 @@ SELECT
   payload ->> 'human_ai_bunny_ai_decision_complete_count' AS q5_ai_decision_complete_count,
   payload ->> 'human_ai_bunny_final_answer_history_json' AS q5_final_answer_history,
   payload ->> 'human_ai_bunny_final_answer_events_json' AS q5_final_answer_events,
-  payload ->> 'human_ai_bunny_final_answer_version_count' AS q5_final_answer_version_count
+  payload ->> 'human_ai_bunny_final_answer_version_count' AS q5_final_answer_version_count,
+
+  payload ->> 'needs_second_round' AS needs_second_round,
+  payload ->> 'effort_screen_version' AS effort_screen_version,
+  payload ->> 'effort_strong_signal_count' AS effort_strong_signal_count,
+  payload ->> 'effort_concern_count' AS effort_concern_count,
+  payload ->> 'effort_reason_codes_json' AS effort_reason_codes,
+  payload ->> 'effort_check_json' AS effort_check_json
 FROM public.creativity_submissions;
 
 COMMENT ON VIEW public.creativity_submissions_export IS
-  '创造性思维测评平铺导出视图：五题答案、过程用时、随机条件、完整AI对话、AI建议判断与最终答案修改轨迹';
+  '创造性思维测评平铺导出视图：五题答案、过程用时、随机条件、完整AI对话、AI建议判断、最终答案修改轨迹与努力作答筛查结果';
