@@ -43,8 +43,16 @@ SELECT
   payload ->> 'instrument_version' AS instrument_version,
   payload ->> 'client_submitted_at' AS client_submitted_at,
   payload ->> 'user_agent' AS user_agent,
-  payload AS raw_payload
+  payload AS raw_payload,
+
+  -- 新增列放在末尾，以便 CREATE OR REPLACE VIEW 平滑升级现有视图。
+  payload ->> 'human_ai_bunny_ai_decisions_json' AS q5_ai_decisions,
+  payload ->> 'human_ai_bunny_ai_decision_count' AS q5_ai_decision_count,
+  payload ->> 'human_ai_bunny_ai_decision_complete_count' AS q5_ai_decision_complete_count,
+  payload ->> 'human_ai_bunny_final_answer_history_json' AS q5_final_answer_history,
+  payload ->> 'human_ai_bunny_final_answer_events_json' AS q5_final_answer_events,
+  payload ->> 'human_ai_bunny_final_answer_version_count' AS q5_final_answer_version_count
 FROM public.creativity_submissions;
 
 COMMENT ON VIEW public.creativity_submissions_export IS
-  '创造性思维测评平铺导出视图：五题答案、过程用时、随机条件与完整AI对话';
+  '创造性思维测评平铺导出视图：五题答案、过程用时、随机条件、完整AI对话、AI建议判断与最终答案修改轨迹';
