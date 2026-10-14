@@ -58,8 +58,22 @@ SELECT
   payload ->> 'effort_strong_signal_count' AS effort_strong_signal_count,
   payload ->> 'effort_concern_count' AS effort_concern_count,
   payload ->> 'effort_reason_codes_json' AS effort_reason_codes,
-  payload ->> 'effort_check_json' AS effort_check_json
+  payload ->> 'effort_check_json' AS effort_check_json,
+
+  -- 当前四题版本的最后一题原名为 human_ai_bunny；保留旧 q5 列以兼容既有导出。
+  payload ->> 'human_ai_bunny_phase' AS q4_step4_phase,
+  payload ->> 'human_ai_bunny_meta_skipped' AS q4_step4_skipped,
+  payload ->> 'human_ai_bunny_meta_quality' AS q4_step4_quality,
+  payload ->> 'human_ai_bunny_meta_confidence' AS q4_step4_confidence,
+  payload ->> 'human_ai_bunny_meta_effort' AS q4_step4_effort,
+  payload ->> 'human_ai_bunny_meta_difficulty' AS q4_step4_difficulty,
+  payload ->> 'human_ai_bunny_meta_strategies_json' AS q4_step4_strategies_json,
+  payload ->> 'human_ai_bunny_meta_strength' AS q4_step4_strength,
+  payload ->> 'human_ai_bunny_meta_gap' AS q4_step4_gap,
+  payload ->> 'human_ai_bunny_phase_seconds_json' AS q4_phase_seconds_json,
+  nullif(payload ->> 'human_ai_bunny_phase_seconds_json', '')::jsonb ->> '4' AS q4_step4_seconds,
+  payload ->> 'human_ai_bunny_phase_events_json' AS q4_phase_events_json
 FROM public.creativity_submissions;
 
 COMMENT ON VIEW public.creativity_submissions_export IS
-  '创造性思维测评平铺导出视图：五题答案、过程用时、随机条件、完整AI对话、AI建议判断、最终答案修改轨迹与努力作答筛查结果';
+  '创造性思维测评平铺导出视图：兼容旧题号，并增加当前四题版本最后一题第四步自评、阶段用时、AI对话与努力作答筛查结果';

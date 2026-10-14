@@ -19,4 +19,4 @@
 
 学生端通过 CloudBase PostgreSQL 提交至 `public.creativity_submissions`。学生端只有插入权限，研究者通过腾讯云账号导出。`payload.instrument_version` 标记页面版本；`payload.anchor_2983_limit_seconds` 记录每份作答实际获得的第二题时限，便于比较修改前后的数据。
 
-`db_export_view.sql` 是独立的数据导出视图；如需使用，应按当前 `payload` 字段检查和更新。
+`db_export_view.sql` 是独立的数据导出视图。最后一题第四步的自评保存在 `payload.human_ai_bunny_meta_*` 等字段中，视图将其展开为 `q4_step4_*` 列。视图原有的 `q5_*` 列是旧版题号，仍保留以兼容既有导出；当前版本只有四道题。
