@@ -105,6 +105,7 @@
   var COLLECTION="creativity_submissions";
   var AI_MODEL_GROUP="cloudbase";
   var AI_MODEL_NAME="hy4-preview";
+  var AI_PROMPT_VERSION="bunny_feedback_v2_20261019";
   // ===== 题目文案编辑区：每题的 title、tag、mins、prompt 和 hint 都可在这里修改。 =====
   var tasks=[
     {id:"anchor_illustration_titles",title:"插图标题",tag:"锚题 · 产生多样想法",mins:5,type:"ideas",minIdeas:3,maxIdeas:3,prompt:"请为上面这幅插图设计出三个彼此明显不同的标题。",hint:"标题可以关注不同事物，也可以用不同角度或表达方式理解这幅图。",figure:'<div class="stimulus"><svg viewBox="0 0 640 340" role="img" aria-label="一本巨大的书位于自然环境中"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dff5ef"/><stop offset="1" stop-color="#fff7dc"/></linearGradient></defs><rect width="640" height="340" rx="22" fill="url(#sky)"/><circle cx="532" cy="70" r="34" fill="#f2b84b" opacity=".8"/><path d="M0 238 Q130 178 265 236 T640 224 V340 H0Z" fill="#91c7a7"/><path d="M0 272 Q145 220 300 280 T640 265 V340 H0Z" fill="#4f9d88"/><path d="M145 250 Q235 188 320 246 Q407 188 500 250 L475 304 Q397 274 320 311 Q242 274 166 304Z" fill="#fffdf7" stroke="#126e68" stroke-width="7"/><path d="M320 246 V311" stroke="#126e68" stroke-width="5"/><path d="M314 235 C296 188 301 142 326 101 C351 143 357 188 326 237Z" fill="#58a99f"/><path d="M326 161 C283 150 260 124 251 90 C291 92 319 113 326 161Z" fill="#7ec3a6"/><path d="M326 179 C370 164 398 136 409 99 C367 102 338 128 326 179Z" fill="#6db58f"/><g fill="#fff"><circle cx="88" cy="82" r="20"/><circle cx="111" cy="73" r="27"/><circle cx="139" cy="84" r="20"/></g></svg></div>'},
@@ -291,7 +292,8 @@
       body='<div class="stage"><h3>第一步：独立构思</h3><p>请先独立写出两个初步想法，并选出一个最值得继续发展的想法。提交后将进入下一阶段，不能返回查看或修改本页。</p><div class="twocol"><label><span class="mini-label">初步想法1</span><textarea class="answer collabInitial" data-index="0" style="min-height:110px">'+esc(a.initialIdeas[0])+'</textarea></label><label><span class="mini-label">初步想法2</span><textarea class="answer collabInitial" data-index="1" style="min-height:110px">'+esc(a.initialIdeas[1])+'</textarea></label></div><label><span class="mini-label" style="margin-top:10px">选择一个最值得继续发展的想法</span><textarea class="answer" id="selectedIdea" style="min-height:110px">'+esc(a.selectedIdea)+'</textarea></label><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">提交初步构思，进入下一步</button></div></div>';
     }else if(a.phase===2&&isAi){
       var chatHtml=a.chat.length?a.chat.map(function(m){return '<div class="msg '+(m.role==="assistant"?"ai":"user")+'">'+esc(m.content)+"</div>"}).join(""):'<div class="chatempty">还没有对话。你可以从自己想讨论的内容开始。</div>';
-      body='<div class="stage"><span class="condition">AI对话方式</span><h3 style="margin-top:12px">第二步：与AI讨论</h3><p>在这一阶段，你可以围绕毛绒兔玩具的设计与AI自由讨论。讨论什么、怎样提问，以及是否采用对话中的信息，都由你自己决定。</p><div class="chatbox" id="chatBox">'+chatHtml+'</div><div class="chatrow"><input id="chatInput" maxlength="500" aria-label="向AI发送消息"><button type="button" class="btn primary" id="sendAi">发送</button></div>'+(a.aiError?'<div class="aiwarn">AI暂时未能回复：'+esc(a.aiError)+'</div>':"")+'<div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">结束讨论，进入最终方案</button></div></div>';
+      var hasAiReply=a.chat.some(function(m){return m.role==="assistant"});
+      body='<div class="stage"><span class="condition">AI对话方式</span><h3 style="margin-top:12px">第二步：与AI讨论</h3><p>在这一阶段，你可以围绕毛绒兔玩具的设计与AI自由讨论。讨论什么、怎样提问，以及是否采用对话中的信息，都由你自己决定。</p><div class="chatbox" id="chatBox">'+chatHtml+'</div><div class="chatrow"><input id="chatInput" maxlength="500" aria-label="向AI发送消息"><button type="button" class="btn primary" id="sendAi">发送</button></div>'+(a.aiError?'<div class="aiwarn">AI暂时未能回复：'+esc(a.aiError)+'</div>':"")+(hasAiReply?'<div class="version-note">如果已经想好方案，可以结束讨论；也可以继续向AI提问。</div>':"")+'<div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">结束讨论，进入最终方案</button></div></div>';
     }else if(a.phase===2&&isReflection){
       body='<div class="stage"><span class="condition">提示反思方式</span><h3 style="margin-top:12px">第二步：独立检查</h3><p>请根据下面的问题独立检查自己的方案。本页不会显示你刚才填写的初步构思。</p><div class="reflection-grid"><label><span class="mini-label">这个想法目前最大的不足是什么？</span><textarea class="answer" id="reflectionWeakness" style="min-height:100px">'+esc(a.reflection.weakness)+'</textarea></label><label><span class="mini-label">你准备怎样修改或完善它？</span><textarea class="answer" id="reflectionImprovement" style="min-height:100px">'+esc(a.reflection.improvement)+'</textarea></label></div><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">完成检查，进入最终方案</button></div></div>';
     }else if(a.phase===3){
@@ -324,6 +326,15 @@
     if(!window.cloudbase)throw new Error("CloudBase SDK 未加载");
     cloudApp=window.cloudbase.init({env:CLOUD_ENV,region:"ap-shanghai",accessKey:CLOUD_ACCESS_KEY});return cloudApp;
   }
+  function constrainAiReply(text,allowQuestion){
+    var parts=String(text||"").match(/[^。！？?!\r\n]+[。！？?!]?|[\r\n]+/g)||[],kept=[],questionUsed=false;
+    parts.forEach(function(part){
+      if(/[？?]/.test(part)){
+        if(allowQuestion&&!questionUsed){kept.push(part.replace(/[？?]+$/,"？"));questionUsed=true}
+      }else kept.push(part);
+    });
+    return kept.join("").replace(/\n{3,}/g,"\n\n").trim()||"可以具体想想这个玩具怎样使用、哪些部件需要注意安全。最终方案由你自己决定。";
+  }
   async function sendAiMessage(){
     if(aiBusy)return;capture();var t=tasks[state.current],a=collaborationAnswer(t),input=el("chatInput"),message=input?input.value.trim():"";
     if(!message){toast("请先输入想和AI讨论的内容");return}
@@ -331,12 +342,16 @@
     a.chat.push({role:"user",content:message,at:new Date().toISOString()});a.aiError="";aiBusy=true;save();render();
     try{
       var model=getCloudApp().ai().createModel(AI_MODEL_GROUP);
-      var system="你是面向四至六年级学生的创造性思维伙伴，任务是帮助学生完善毛绒兔玩具的改进方案。不要代替学生完成最终答案。请根据学生当前的表达灵活回应：优先提出一个简短问题，帮助学生检查方案的创意性、实用性或安全性；也可以指出一个具体不足。只有当学生主动请求建议或明显遇到困难时，才提供1—2个启发方向，不要求学生必须从中选择。鼓励学生自行判断是否采纳，并说明理由。语言友好、简短，每次不超过140个汉字，不索要或复述个人信息。";
+      var firstReply=!a.chat.some(function(m){return m.role==="assistant"});
+      var system="你是面向四至六年级学生的创造性思维伙伴，任务是帮助学生完善毛绒兔玩具的改进方案。先回应学生刚说的内容，给出一个具体、简短的反馈；不要代替学生完成最终答案。学生主动提出问题时，先直接回答，不要用反问代替回答。只有学生主动请求建议或明显遇到困难时，才提供1—2个启发方向，不要求学生必须采纳。鼓励学生自行判断，并说明理由。语言友好、简短，每次不超过140个汉字，不索要或复述个人信息。"+
+        (firstReply?"这是你第一次回复。只有确实有助于学生检查创意性、实用性或安全性时，才在反馈后提出最多一个简短、具体的问题；也可以完全不提问。":"你已经回复过学生。从本次起不要主动追问，不使用疑问句或问号。直接回答学生的问题，或就其新想法给出具体反馈。不要要求学生继续回答；适合时提醒学生可以自行结束讨论并形成最终方案。");
       var context="任务：改进普通毛绒兔玩具，使它更有趣、有创意、安全且可行。学生的初步想法：1."+a.initialIdeas[0]+"；2."+a.initialIdeas[1]+"。学生选择继续发展的想法："+a.selectedIdea;
       var messages=[{role:"system",content:system},{role:"user",content:context}].concat(a.chat.map(function(m){return{role:m.role,content:m.content}}));
       var result=await model.generateText({model:AI_MODEL_NAME,reasoning_effort:"none",messages:messages});
       var reply=result&&result.text?String(result.text).trim():"";if(!reply)throw new Error("没有收到有效回复");
-      a.chat.push({role:"assistant",content:reply,at:new Date().toISOString(),model:AI_MODEL_NAME,responseId:"ai_"+Date.now().toString(36)});
+      var studentAsks=/[？?]|请问|怎么|如何|为什么|能不能|可不可以|请帮|帮我|给.{0,8}建议/.test(message);
+      reply=constrainAiReply(reply,firstReply&&!studentAsks);
+      a.chat.push({role:"assistant",content:reply,at:new Date().toISOString(),model:AI_MODEL_NAME,promptVersion:AI_PROMPT_VERSION,responseId:"ai_"+Date.now().toString(36)});
     }catch(err){console.error(err);a.aiError=String((err&&err.message)||err||"服务不可用").slice(0,180)}
     aiBusy=false;save();render();
   }
@@ -477,6 +492,7 @@
     o.ai_chat_json=JSON.stringify(chat);
     o.ai_message_count=chat.length;
     o.ai_user_message_count=chat.filter(function(m){return m.role==="user"}).length;
+    o.ai_prompt_version=AI_PROMPT_VERSION;
     state.effortCheck=assessEffort();
     o.needs_second_round=state.effortCheck.needs_second_round;
     o.effort_screen_version=state.effortCheck.version;
@@ -488,7 +504,7 @@
   }
   function download(name,type,text){var blob=new Blob(["\ufeff"+text],{type:type});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url)},500)}
   function dlCsv(){capture();var o=rowData(),heads=Object.keys(o),line=heads.map(function(k){return csvCell(o[k])}).join(",");download("creativity_"+safeName(state.meta.studentId)+".csv","text/csv;charset=utf-8",heads.join(",")+"\n"+line)}
-  function dlJson(){download("creativity_"+safeName(state.meta.studentId)+".json","application/json;charset=utf-8",JSON.stringify({instrument:"creativity_assessment_v20_2983_6min_timer",exportedAt:new Date().toISOString(),data:rowData(),raw:state},null,2))}
+  function dlJson(){download("creativity_"+safeName(state.meta.studentId)+".json","application/json;charset=utf-8",JSON.stringify({instrument:"creativity_assessment_v21_bunny_dialogue_v2",exportedAt:new Date().toISOString(),data:rowData(),raw:state},null,2))}
   function safeName(s){return String(s||"student").replace(/[^a-zA-Z0-9_-]/g,"_")}
   el("begin").onclick=begin;
   el("resume").onclick=function(){if(!load()){toast("没有找到上次记录");return}el("studentId").value=state.meta.studentId||"";el("grade").value=state.meta.grade||"";el("classCode").value=state.meta.classCode||"";show("test");render();startTimer()};
@@ -503,7 +519,7 @@
       var app=getCloudApp();
       state.submittedAt=new Date().toISOString();
       var payload=rowData();
-      payload.instrument_version="creativity_assessment_v20_2983_6min_timer";
+      payload.instrument_version="creativity_assessment_v21_bunny_dialogue_v2";
       payload.client_submitted_at=state.submittedAt;
       payload.user_agent=navigator.userAgent.slice(0,300);
       var row={

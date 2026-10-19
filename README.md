@@ -15,8 +15,12 @@
 
 最后一题按学号和年级稳定分配完成方式，包括 AI 对话、提示反思和独立完成。AI 对话使用腾讯云 CloudBase 内置的 `hy4-preview` 模型。
 
+AI 对话版本 `bunny_feedback_v2_20261019`：AI 第一次回复先给具体反馈，仅在有帮助时最多问一个问题；之后直接回答学生的问题或反馈新想法，不再主动追问。回复中的问号句也会按轮次过滤。学生仍可继续提问，或自行结束讨论。此变更只影响 AI 对话条件；施测中的前后版本应在分析时区分。
+
 ## 数据与版本
 
 学生端通过 CloudBase PostgreSQL 提交至 `public.creativity_submissions`。学生端只有插入权限，研究者通过腾讯云账号导出。`payload.instrument_version` 标记页面版本；`payload.anchor_2983_limit_seconds` 记录每份作答实际获得的第二题时限，便于比较修改前后的数据。
+
+AI 对话版本另记录于 `payload.ai_prompt_version`。每条新版 AI 回复还在 `human_ai_bunny_chat_json` 中记录 `promptVersion`，便于辨识更新前后交错的一次会话；旧回复没有该字段。上线时间应另记在施测日志中，不能仅凭学生的提交时间判断其看到的版本。
 
 `db_export_view.sql` 是独立的数据导出视图。最后一题第四步的自评保存在 `payload.human_ai_bunny_meta_*` 等字段中，视图将其展开为 `q4_step4_*` 列。视图原有的 `q5_*` 列是旧版题号，仍保留以兼容既有导出；当前版本只有四道题。
