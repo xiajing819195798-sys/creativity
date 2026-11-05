@@ -40,10 +40,10 @@
     <section id="start" class="card hero">
       <span class="eyebrow">研究测评</span>
       <h1>想法没有标准模样，<br>请写出你的独特思考。</h1>
-      <p class="lead">本测评包含3道创造性思维题和1道改进方案题。最后一题每位同学会采用不同的完成方式。</p>
+      <p class="lead" id="assessmentLead">本次测评的题目与限时由老师设置，请按照自己的真实想法作答。</p>
       <div class="facts">
-        <div class="fact"><b>4</b><span>个任务</span></div>
-        <div class="fact"><b>每题 3–20 分钟</b><span>总上限约34分钟</span></div>
+        <div class="fact"><b id="taskCount">等待设置</b><span>个任务</span></div>
+        <div class="fact"><b id="taskTimes">等待设置</b><span id="totalTime">每题独立限时</span></div>
         <div class="fact"><b>自动暂存</b><span>本设备浏览器内保存</span></div>
       </div>
       <div class="formgrid">
@@ -51,7 +51,7 @@
         <div class="field"><label for="grade">年级</label><select id="grade" disabled><option value="">正在加载年级</option></select><small id="gradeConfigStatus" role="status">正在读取测评设置。</small><button type="button" id="retryGradeConfig" class="btn ghost hidden">重新加载年级</button></div>
         <div class="field"><label for="classCode">班级</label><input id="classCode" maxlength="20" autocomplete="off" placeholder="例如：1班就填写1"></div>
       </div>
-      <div class="notice"><b>限时规则：</b>进入每道题后开始倒计时；时间到会自动保存并进入下一题，进入下一题后不能返回。刷新或关闭网页不会重置当前题时间。<strong>若被系统判定为不努力作答，将后续进行二轮作答。</strong></div><label class="consent"><input type="checkbox" id="consent"><span>老师已向我说明测评用途和限时规则。可以按真实想法作答。</span></label>
+      <div class="notice"><b>限时规则：</b>进入每道题后开始倒计时；时间到会自动保存并进入下一题，进入下一题后不能返回。刷新或关闭网页不会重置当前题时间。<strong>请尽力完成每一道题。</strong></div><label class="consent"><input type="checkbox" id="consent"><span>老师已向我说明测评用途和限时规则。可以按真实想法作答。</span></label>
       <div class="btnrow">
         <button class="btn primary" id="begin" disabled>开始作答</button>
         <button class="btn ghost" id="resume" disabled>继续上次作答</button>
@@ -121,9 +121,21 @@
     {id:"human_ai_bunny",title:"改进毛绒兔玩具",tag:"随机任务 · 人机创造",mins:20,type:"collaboration",prompt:"请提出一个最佳改进方案，使普通的毛绒兔玩具更加有趣、有创意，同时适合儿童安全地使用。",hint:"先写出自己的想法；随后系统会随机分配完成方式，最后形成完整方案。"}
   ];
   // ===== 题目图片编辑区：图片文件放在 assets/images/，修改 src 即可更换。 =====
-  tasks[0].figure='<div class="stimulus"><img src="../assets/images/comic-title.png" alt="漫画标题题目图片：灯泡中的地球"></div>';
-  tasks[1].figure='<div class="stimulus"><img src="../assets/images/story-2983.png" alt="数字故事2983题目图片：封面写有2983的橙色书本"></div>';
-  tasks[3].figure='<div class="stimulus"><img src="../assets/images/plush-rabbit.webp" alt="一只普通的浅米色毛绒兔玩具"></div>';
+  tasks[0].figure='<div class="stimulus"><img src="assets/images/comic-title.png" alt="漫画标题题目图片：灯泡中的地球"></div>';
+  tasks[1].figure='<div class="stimulus"><img src="assets/images/story-2983.png" alt="数字故事2983题目图片：封面写有2983的橙色书本"></div>';
+  tasks[3].figure='<div class="stimulus"><img src="assets/images/plush-rabbit.webp" alt="一只普通的浅米色毛绒兔玩具"></div>';
+  var allTasks=tasks.slice();
+  function applyTaskPlan(plan){
+    if(!Array.isArray(plan)||!plan.length||plan.length>allTasks.length)throw new Error("未设置施测题目");
+    var used=new Set();
+    var selected=plan.map(function(setting){
+      if(!setting||typeof setting.id!=="string"||used.has(setting.id)||!Number.isInteger(setting.minutes)||setting.minutes<1||setting.minutes>180)throw new Error("施测题目或限时设置无效");
+      var original=allTasks.find(function(t){return t.id===setting.id});
+      if(!original)throw new Error("施测题目不存在");
+      used.add(setting.id);return Object.assign({},original,{mins:setting.minutes});
+    });
+    tasks=selected;
+  }
   var state={meta:{},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,condition:null,startedAt:null,submittedAt:null};
   var timer=null,lastTick=null,advancing=false,aiBusy=false,cloudApp=null,finalVersionTimer=null;
   function el(id){return document.getElementById(id)}
@@ -131,7 +143,7 @@
   function show(which){["start","test","finish"].forEach(function(id){el(id).classList.toggle("hidden",id!==which)})}
   function toast(msg){el("toast").textContent=msg;el("toast").classList.add("show");setTimeout(function(){el("toast").classList.remove("show")},1600)}
   function save(){localStorage.setItem(KEY,JSON.stringify(state));el("saveState").textContent="已自动保存 · "+new Date().toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});}
-  function load(){try{var x=JSON.parse(localStorage.getItem(KEY));if(x&&x.answers){state=x;state.taskStarted=state.taskStarted||{};state.taskDeadline=state.taskDeadline||{};state.taskSeconds=state.taskSeconds||{};state.assignment=state.assignment||assignmentInfo(state.meta.studentId,state.meta.grade);state.condition=state.condition||state.assignment.condition;var started=Date.parse(state.taskStarted.anchor_2983||"");var deadline=Number(state.taskDeadline.anchor_2983);if(state.current===1&&Number.isFinite(started)&&Number.isFinite(deadline)&&deadline>Date.now()&&Math.abs(deadline-started-300000)<1000){state.taskDeadline.anchor_2983=deadline+60000}return true}}catch(e){}return false}
+  function load(){try{var x=JSON.parse(localStorage.getItem(KEY));if(x&&x.answers){state=x;state.taskStarted=state.taskStarted||{};state.taskDeadline=state.taskDeadline||{};state.taskSeconds=state.taskSeconds||{};state.assignment=state.assignment||assignmentInfo(state.meta.studentId,state.meta.grade);state.condition=state.condition||state.assignment.condition;return true}}catch(e){}return false}
   function hash32(s){var h=2166136261;s=String(s||"");for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
   function assignmentInfo(studentId,grade){
     var digits=String(studentId||"").match(/\d+/g),source=digits&&digits.length?"numeric_student_id":"hashed_student_id",ordinal=source==="numeric_student_id"?Number(digits.join("").slice(-9)):hash32(studentId),index=Math.max(0,ordinal-1),block=Math.floor(index/4),slot=index%4,perms=[["ai","ai","control","reflection"],["ai","ai","reflection","control"],["ai","control","ai","reflection"],["ai","reflection","ai","control"],["ai","control","reflection","ai"],["ai","reflection","control","ai"],["control","ai","ai","reflection"],["reflection","ai","ai","control"],["control","ai","reflection","ai"],["reflection","ai","control","ai"],["control","reflection","ai","ai"],["reflection","control","ai","ai"]],permutation=hash32("grade_weighted_quad_v2|"+String(grade||"")+"|"+block)%perms.length,condition=perms[permutation][slot];
@@ -161,7 +173,7 @@
     if(!gradeConfig||gradeConfig.allowed_grades.indexOf(Number(grade))<0){toast("请选择本次开放的年级");return}
     if(!sid||!grade||!cc){toast("请填写编号、年级和班级代码");return}
     if(!el("consent").checked){toast("请先阅读并勾选说明");return}
-    var assignment=assignmentInfo(sid,grade);state={meta:{studentId:sid,grade:grade,classCode:cc,gradeConfigVersion:gradeConfig.version},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,condition:assignment.condition,assignment:assignment,startedAt:new Date().toISOString(),submittedAt:null};
+    var assignment=assignmentInfo(sid,grade);state={meta:{studentId:sid,grade:grade,classCode:cc,gradeConfigVersion:gradeConfig.version,assessmentTasks:gradeConfig.assessment_tasks},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,condition:assignment.condition,assignment:assignment,startedAt:new Date().toISOString(),submittedAt:null};
     save();show("test");render();startTimer();
   }
   function render(){
@@ -451,8 +463,8 @@
     });
     var recorded=Object.keys(state.taskSeconds||{}).reduce(function(n,k){return n+(Number(state.taskSeconds[k])||0)},0);
     if(recorded>0&&recorded<180)add("overall","concern","very_short_total_time");
-    var needs=blank>=2||invalid>=2||strong>=2||(strong>=1&&concerns>=3);
-    return {version:"effort_screen_v1",needs_second_round:needs,automatic_screen:true,strong_signal_count:strong,concern_count:concerns,blank_task_count:blank,invalid_text_task_count:invalid,recorded_task_seconds:recorded,reason_codes:checks.map(function(x){return x.code}),task_checks:checks,assessed_at:new Date().toISOString()};
+    var needs=tasks.length===allTasks.length?(blank>=2||invalid>=2||strong>=2||(strong>=1&&concerns>=3)):null;
+    return {version:"effort_screen_v1",needs_second_round:needs,automatic_screen:needs!==null,strong_signal_count:strong,concern_count:concerns,blank_task_count:blank,invalid_text_task_count:invalid,recorded_task_seconds:recorded,reason_codes:checks.map(function(x){return x.code}),task_checks:checks,assessed_at:new Date().toISOString()};
   }
   function answerText(t,a){
     if(t.type==="ticket"){
@@ -470,14 +482,14 @@
     }
     return Array.isArray(a)?a.filter(Boolean).map(function(x,j){return(j+1)+". "+x}).join("\n"):(a||"");
   }
-  function finish(){clearInterval(timer);show("finish");var done=tasks.filter(function(t){return hasResponse(t,state.answers[t.id])}).length;state.effortCheck=assessEffort();save();var effortText=state.effortCheck.needs_second_round?"<br><strong>系统初步判定：本次作答需要后续进行二轮作答。</strong>":"<br>系统已完成作答努力程度检查，本次无需二轮作答。";el("summary").innerHTML="<b>"+esc(state.meta.studentId)+"</b> 已完成 "+done+" / "+tasks.length+" 题，累计用时 "+fmt(secondsTotal())+"。最后一题采用“"+conditionLabel(state.condition)+"”方式。请检查后统一提交。"+effortText;
+  function finish(){clearInterval(timer);show("finish");var done=tasks.filter(function(t){return hasResponse(t,state.answers[t.id])}).length;state.effortCheck=assessEffort();save();var effortText=state.effortCheck.needs_second_round===null?"<br>本次题目组合未启用自动作答努力程度判定。":state.effortCheck.needs_second_round?"<br><strong>系统初步判定：本次作答需要后续进行二轮作答。</strong>":"<br>系统已完成作答努力程度检查，本次无需二轮作答。";el("summary").innerHTML="<b>"+esc(state.meta.studentId)+"</b> 已完成 "+done+" / "+tasks.length+" 题，累计用时 "+fmt(secondsTotal())+"。"+(tasks.some(function(t){return t.type==="collaboration"})?"毛绒兔题采用“"+conditionLabel(state.condition)+"”方式。":"")+"请检查后统一提交。"+effortText;
     if(state.cloudSubmissionId){showSubmitted(state.cloudSubmissionId)}
     el("review").innerHTML=tasks.map(function(t,i){var txt=answerText(t,state.answers[t.id]);return '<div class="reviewitem"><b>'+(i+1)+". "+esc(t.title)+'</b><div>'+esc(txt||"（未作答）")+"</div></div>"}).join("");
   }
   function csvCell(x){var s=String(x==null?"":x);return '"'+s.replace(/"/g,'""')+'"'}
   function rowData(){
     var assignment=state.assignment||assignmentInfo(state.meta.studentId,state.meta.grade),o={student_id:state.meta.studentId,grade:state.meta.grade,class_code:state.meta.classCode,condition:state.condition,assignment_method:assignment.method,assignment_stratum_grade:assignment.stratum_grade,assignment_block_id:assignment.block_id,assignment_block_slot:assignment.block_slot,assignment_permutation:assignment.permutation,assignment_pair_id:assignment.pair_id,assignment_pair_slot:assignment.pair_slot,assignment_orientation:assignment.orientation,assignment_ordinal_source:assignment.ordinal_source,started_at:state.startedAt,submitted_at:state.submittedAt,total_seconds:secondsTotal()};
-    o.school_id=SCHOOL_ID;o.school_name=SCHOOL_NAME;o.instrument_version=INSTRUMENT_VERSION;o.grade_config_version=state.meta.gradeConfigVersion;
+    o.school_id=SCHOOL_ID;o.school_name=SCHOOL_NAME;o.instrument_version=INSTRUMENT_VERSION;o.grade_config_version=state.meta.gradeConfigVersion;o.assessment_tasks=state.meta.assessmentTasks;
     tasks.forEach(function(t){
       var a=state.answers[t.id];
       if(t.type==="collaboration"){
@@ -516,17 +528,21 @@
   function dlJson(){download("creativity_"+safeName(state.meta.studentId)+".json","application/json;charset=utf-8",JSON.stringify({instrument:INSTRUMENT_VERSION,exportedAt:new Date().toISOString(),data:rowData(),raw:state},null,2))}
   function safeName(s){return String(s||"student").replace(/[^a-zA-Z0-9_-]/g,"_")}
   el("begin").onclick=begin;
-  el("resume").onclick=function(){if(!load()){toast("没有找到上次记录");return}if(!gradeConfig||gradeConfig.allowed_grades.indexOf(Number(state.meta.grade))<0){toast("原作答的年级未开放，请联系老师");return}state.meta.gradeConfigVersion=gradeConfig.version;el("studentId").value=state.meta.studentId||"";el("grade").value=state.meta.grade||"";el("classCode").value=state.meta.classCode||"";show("test");render();startTimer()};
+  el("resume").onclick=function(){if(!load()){toast("没有找到上次记录");return}if(!gradeConfig||gradeConfig.allowed_grades.indexOf(Number(state.meta.grade))<0){toast("原作答的年级未开放，请联系老师");return}if(state.meta.gradeConfigVersion!==gradeConfig.version||JSON.stringify(state.meta.assessmentTasks)!==JSON.stringify(gradeConfig.assessment_tasks)){toast("测评设置已变更，请联系老师处理原作答");return}applyTaskPlan(state.meta.assessmentTasks);el("studentId").value=state.meta.studentId||"";el("grade").value=state.meta.grade||"";el("classCode").value=state.meta.classCode||"";show("test");render();startTimer()};
   async function loadGradeConfig(){
     gradeConfig=null;el("begin").disabled=true;el("resume").disabled=true;el("grade").disabled=true;el("retryGradeConfig").classList.add("hidden");el("gradeConfigStatus").textContent="正在读取测评设置。";
     try{
-      var result=await getCloudApp().rdb().from(GRADE_CONFIG_TABLE).select("version,allowed_grades").eq("config_key",GRADE_CONFIG_KEY);
+      var result=await getCloudApp().rdb().from(GRADE_CONFIG_TABLE).select("version,allowed_grades,assessment_tasks").eq("config_key",GRADE_CONFIG_KEY);
       if(result.error)throw result.error;
       var rows=result.data;if(!Array.isArray(rows)||rows.length!==1||typeof rows[0].version!=="string"||!rows[0].version||!Array.isArray(rows[0].allowed_grades)||!rows[0].allowed_grades.length)throw new Error("配置未开启");
       var grades=rows[0].allowed_grades.map(Number);if(grades.some(function(n){return !Number.isInteger(n)||n<1||n>12})||new Set(grades).size!==grades.length)throw new Error("年级设置无效");
-      gradeConfig={version:rows[0].version,allowed_grades:grades.sort(function(a,b){return a-b})};
+      applyTaskPlan(rows[0].assessment_tasks);
+      var times=tasks.map(function(t){return t.mins}),lo=Math.min.apply(null,times),hi=Math.max.apply(null,times);
+      el("taskCount").textContent=String(tasks.length);el("taskTimes").textContent=lo===hi?"每题 "+lo+" 分钟":"每题 "+lo+"–"+hi+" 分钟";el("totalTime").textContent="总上限约 "+times.reduce(function(a,b){return a+b},0)+" 分钟";
+      el("assessmentLead").textContent="本次测评包含 "+tasks.length+" 道题，请按照自己的真实想法作答。"+(tasks.some(function(t){return t.type==="collaboration"})?"毛绒兔题会采用不同的完成方式。":"");
+      gradeConfig={version:rows[0].version,allowed_grades:grades.sort(function(a,b){return a-b}),assessment_tasks:rows[0].assessment_tasks.map(function(t){return {id:t.id,minutes:t.minutes}})};
       el("grade").innerHTML='<option value="">请选择</option>'+gradeConfig.allowed_grades.map(function(n){return '<option value="'+n+'">'+GRADE_NAMES[n]+'</option>'}).join("");
-      el("grade").disabled=false;el("begin").disabled=false;el("resume").disabled=!localStorage.getItem(KEY);el("gradeConfigStatus").textContent="请选择本次开放的年级。";
+      el("grade").disabled=false;el("begin").disabled=false;el("resume").disabled=!localStorage.getItem(KEY);el("gradeConfigStatus").textContent="本次共 "+tasks.length+" 道题，请选择开放的年级。";
     }catch(error){el("grade").innerHTML='<option value="">年级暂不可用</option>';el("gradeConfigStatus").textContent="暂时无法读取测评设置，请联系老师或重试。";el("retryGradeConfig").classList.remove("hidden")}
   }
   el("retryGradeConfig").onclick=loadGradeConfig;
