@@ -95,10 +95,11 @@
   </main>
   <div class="toast" id="toast"></div>
 
-<script src="https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js"></script>
+<script>if(!/(?:^|[?&])preview=1(?:&|$)/.test(location.search))document.write('<script src="https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js"><\/script>');</script>
 <script>
 (function(){
   "use strict";
+  var PREVIEW=/(?:^|[?&])preview=1(?:&|$)/.test(window.location.search);
   var KEY="creativity_assessment_xiangcheng_202611_v1";
   var CLOUD_ENV="creativity-d6gaz98q82144e44e";
   var CLOUD_ACCESS_KEY="eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ3ODkzMjBhLWRiOWQtNDk5OS1hMDgyLWVkYzVjYmYzY2RiNSJ9.eyJpc3MiOiJodHRwczovL2NyZWF0aXZpdHktZDZnYXo5OHE4MjE0NGU0NGUuYXAtc2hhbmdoYWkudGNiLWFwaS50ZW5jZW50Y2xvdWRhcGkuY29tIiwic3ViIjoiYW5vbiIsImF1ZCI6ImNyZWF0aXZpdHktZDZnYXo5OHE4MjE0NGU0NGUiLCJleHAiOjQwOTE5NTI1NzMsImlhdCI6MTc4ODI2OTM3Mywibm9uY2UiOiJNOG10LWdOcFJocWVROXFUbHpBbHZRIiwiYXRfaGFzaCI6Ik04bXQtZ05wUmhxZVE5cVRsekFsdlEiLCJuYW1lIjoiQW5vbnltb3VzIiwic2NvcGUiOiJhbm9ueW1vdXMiLCJwcm9qZWN0X2lkIjoiY3JlYXRpdml0eS1kNmdhejk4cTgyMTQ0ZTQ0ZSIsIm1ldGEiOnsicGxhdGZvcm0iOiJQdWJsaXNoYWJsZUtleSJ9LCJyb2xlIjoiYW5vbiIsImlzX2Fub255bW91cyI6dHJ1ZSwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiYW5vbnltb3VzIiwicHJvdmlkZXJzIjpbImFub255bW91cyJdfSwidXNlcl9tZXRhZGF0YSI6eyJuYW1lIjoiQW5vbnltb3VzIn0sInVzZXJfdHlwZSI6IiIsImNsaWVudF90eXBlIjoiY2xpZW50X3VzZXIiLCJpc19zeXN0ZW1fYWRtaW4iOmZhbHNlfQ.BUOE-LR3VQCowe-IeYF8Oxm-X-dbwFEEfzNJyHOddEEiJKWW64YiecAqTFsPwJ77V8SDHfIstlydvPF4fwWmqeDtzvX9oGLW2Ao-BZwJ7-i-G-NfXOASV3XirHyXighCrmQopvgOzKMSVQhDvueld5RvHXcbtF419vNq0EmYlYJyNJ4zpReXgHIdX5VgzfvAxVvqC28aoqL2j_aoorC_q61K52K1OgYSlJ6_nsnAR-U1n2s7Ej5oLab0xqJF7Pnzxvj3HmnIcu_40I_O3elUSUsHS7QsSIqeWYw_Y51FtCABF7lhQ93Og3C7YBPnOOCVYih5fIYjAAeOYO8S894hhA";
@@ -142,8 +143,8 @@
   function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]})}
   function show(which){["start","test","finish"].forEach(function(id){el(id).classList.toggle("hidden",id!==which)})}
   function toast(msg){el("toast").textContent=msg;el("toast").classList.add("show");setTimeout(function(){el("toast").classList.remove("show")},1600)}
-  function save(){localStorage.setItem(KEY,JSON.stringify(state));el("saveState").textContent="已自动保存 · "+new Date().toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});}
-  function load(){try{var x=JSON.parse(localStorage.getItem(KEY));if(x&&x.answers){state=x;state.taskStarted=state.taskStarted||{};state.taskDeadline=state.taskDeadline||{};state.taskSeconds=state.taskSeconds||{};state.assignment=state.assignment||assignmentInfo(state.meta.studentId,state.meta.grade);state.condition=state.condition||state.assignment.condition;return true}}catch(e){}return false}
+  function save(){if(PREVIEW){el("saveState").textContent="教师预览 · 不保存、不提交";return}localStorage.setItem(KEY,JSON.stringify(state));el("saveState").textContent="已自动保存 · "+new Date().toLocaleTimeString("zh-CN",{hour:"2-digit",minute:"2-digit"});}
+  function load(){if(PREVIEW)return false;try{var x=JSON.parse(localStorage.getItem(KEY));if(x&&x.answers){state=x;state.taskStarted=state.taskStarted||{};state.taskDeadline=state.taskDeadline||{};state.taskSeconds=state.taskSeconds||{};state.assignment=state.assignment||assignmentInfo(state.meta.studentId,state.meta.grade);state.condition=state.condition||state.assignment.condition;return true}}catch(e){}return false}
   function hash32(s){var h=2166136261;s=String(s||"");for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
   function assignmentInfo(studentId,grade){
     var digits=String(studentId||"").match(/\d+/g),source=digits&&digits.length?"numeric_student_id":"hashed_student_id",ordinal=source==="numeric_student_id"?Number(digits.join("").slice(-9)):hash32(studentId),index=Math.max(0,ordinal-1),block=Math.floor(index/4),slot=index%4,perms=[["ai","ai","control","reflection"],["ai","ai","reflection","control"],["ai","control","ai","reflection"],["ai","reflection","ai","control"],["ai","control","reflection","ai"],["ai","reflection","control","ai"],["control","ai","ai","reflection"],["reflection","ai","ai","control"],["control","ai","reflection","ai"],["reflection","ai","control","ai"],["control","reflection","ai","ai"],["reflection","control","ai","ai"]],permutation=hash32("grade_weighted_quad_v2|"+String(grade||"")+"|"+block)%perms.length,condition=perms[permutation][slot];
@@ -162,13 +163,15 @@
     if(remaining<=0&&!advancing)autoAdvance();
   }
   function autoAdvance(){
+    if(PREVIEW)return;
     if(advancing)return;advancing=true;capture();
     var t=tasks[state.current];state.taskSeconds[t.id]=t.mins*60;save();
     if(state.current===tasks.length-1){advancing=false;finish();return}
     state.current+=1;advancing=false;toast("本题时间到，已自动进入下一题");render();
   }
-  function startTimer(){clearInterval(timer);lastTick=Date.now();timer=setInterval(function(){var now=Date.now(),d=Math.max(0,Math.round((now-lastTick)/1000));lastTick=now;if(!el("test").classList.contains("hidden")){var t=tasks[state.current],id=t.id;state.taskSeconds[id]=Math.min(t.mins*60,(state.taskSeconds[id]||0)+d);el("elapsed").textContent=fmt(secondsTotal());updateCountdown();if(state.taskSeconds[id]%10===0)save()}},1000)}
+  function startTimer(){if(PREVIEW)return;clearInterval(timer);lastTick=Date.now();timer=setInterval(function(){var now=Date.now(),d=Math.max(0,Math.round((now-lastTick)/1000));lastTick=now;if(!el("test").classList.contains("hidden")){var t=tasks[state.current],id=t.id;state.taskSeconds[id]=Math.min(t.mins*60,(state.taskSeconds[id]||0)+d);el("elapsed").textContent=fmt(secondsTotal());updateCountdown();if(state.taskSeconds[id]%10===0)save()}},1000)}
   function begin(){
+    if(PREVIEW)return;
     var sid=el("studentId").value.trim(),grade=el("grade").value,cc=el("classCode").value.trim();
     if(!gradeConfig||gradeConfig.allowed_grades.indexOf(Number(grade))<0){toast("请选择本次开放的年级");return}
     if(!sid||!grade||!cc){toast("请填写编号、年级和班级代码");return}
@@ -342,6 +345,7 @@
     collaborationEvent(a,"complete_phase",{from:a.phase,to:a.phase+1});if(a.phase===2)a.treatmentCompletedAt=new Date().toISOString();a.phase+=1;a.phaseStartElapsed=now;save();render();
   }
   function getCloudApp(){
+    if(PREVIEW)throw new Error("预览模式禁止访问云服务");
     if(cloudApp)return cloudApp;
     if(!window.cloudbase)throw new Error("CloudBase SDK 未加载");
     cloudApp=window.cloudbase.init({env:CLOUD_ENV,region:"ap-shanghai",accessKey:CLOUD_ACCESS_KEY});return cloudApp;
@@ -356,6 +360,7 @@
     return kept.join("").replace(/\n{3,}/g,"\n\n").trim()||"可以具体想想这个玩具怎样使用、哪些部件需要注意安全。最终方案由你自己决定。";
   }
   async function sendAiMessage(){
+    if(PREVIEW)return;
     if(aiBusy)return;capture();var t=tasks[state.current],a=collaborationAnswer(t),input=el("chatInput"),message=input?input.value.trim():"";
     if(!message){toast("请先输入想和AI讨论的内容");return}
     if(!a.selectedIdea.trim()){toast("请先写出你选择的初步想法");return}
@@ -401,6 +406,7 @@
     }
   }
   function go(){
+    if(PREVIEW)return;
     capture();var t=tasks[state.current];
     if(t.type==="ticket"){
       var ta=ticketAnswer(t);if(ta.submissions.length<3){toast("请先完成并保存三个车票任务");save();return}if(!ta.self.confidence||!ta.self.strategies.length||!ta.self.reflection.trim()){toast("请完成车票任务的自我评价和简短反思");save();return}
@@ -527,9 +533,35 @@
   function dlCsv(){capture();var o=rowData(),heads=Object.keys(o),line=heads.map(function(k){return csvCell(o[k])}).join(",");download("creativity_"+safeName(state.meta.studentId)+".csv","text/csv;charset=utf-8",heads.join(",")+"\n"+line)}
   function dlJson(){download("creativity_"+safeName(state.meta.studentId)+".json","application/json;charset=utf-8",JSON.stringify({instrument:INSTRUMENT_VERSION,exportedAt:new Date().toISOString(),data:rowData(),raw:state},null,2))}
   function safeName(s){return String(s||"student").replace(/[^a-zA-Z0-9_-]/g,"_")}
+  // 教师预览复用真实题目和渲染函数，但不读取云配置、不写暂存、不允许交互提交。
+  if(PREVIEW){
+    el("saveState").textContent="教师预览 · 不保存、不提交";
+    el("next").disabled=true;show("test");el("taskTitle").textContent="请选择要预览的题目";el("timeValue").textContent="--:--";
+    window.addEventListener("message",function(event){
+      if(event.origin!==window.location.origin||event.source!==window.parent||!event.data||event.data.type!=="xc-preview-plan")return;
+      try{
+        var plan=event.data.tasks,index=event.data.index;
+        applyTaskPlan(plan);
+        if(!Number.isInteger(index)||index<0||index>=tasks.length)throw new Error("预览题目无效");
+        var phase=event.data.phase, condition=event.data.condition;
+        if(![1,2,3,4].includes(phase))phase=1;
+        if(!["ai","reflection","control"].includes(condition))condition="ai";
+        state={meta:{},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:index,condition:condition,startedAt:new Date().toISOString(),submittedAt:null};
+        if(tasks[index].type==="collaboration")state.answers[tasks[index].id]={phase:phase};
+        show("test");render();
+        // Read-only preview: never allow sending AI requests, saving, or progressing.
+        Array.prototype.forEach.call(el("test").querySelectorAll("button,input,select,textarea"),function(node){node.disabled=true});
+        el("timeValue").textContent=fmt(tasks[index].mins*60);
+        el("timeValue").setAttribute("aria-label","预设倒计时，预览不计时");
+      }catch(e){el("taskTitle").textContent="请选择要预览的题目";el("stepText").textContent="";el("taskTag").textContent="";el("hint").textContent="";el("timeValue").textContent="--:--";el("bar").style.width="0%";el("prompt").textContent="";el("answerArea").textContent="";}
+    });
+    window.parent.postMessage({type:"xc-preview-ready"},window.location.origin);
+    return;
+  }
   el("begin").onclick=begin;
   el("resume").onclick=function(){if(!load()){toast("没有找到上次记录");return}if(!gradeConfig||gradeConfig.allowed_grades.indexOf(Number(state.meta.grade))<0){toast("原作答的年级未开放，请联系老师");return}if(state.meta.gradeConfigVersion!==gradeConfig.version||JSON.stringify(state.meta.assessmentTasks)!==JSON.stringify(gradeConfig.assessment_tasks)){toast("测评设置已变更，请联系老师处理原作答");return}applyTaskPlan(state.meta.assessmentTasks);el("studentId").value=state.meta.studentId||"";el("grade").value=state.meta.grade||"";el("classCode").value=state.meta.classCode||"";show("test");render();startTimer()};
   async function loadGradeConfig(){
+    if(PREVIEW)return;
     gradeConfig=null;el("begin").disabled=true;el("resume").disabled=true;el("grade").disabled=true;el("retryGradeConfig").classList.add("hidden");el("gradeConfigStatus").textContent="正在读取测评设置。";
     try{
       var result=await getCloudApp().rdb().from(GRADE_CONFIG_TABLE).select("version,allowed_grades,assessment_tasks").eq("config_key",GRADE_CONFIG_KEY);
@@ -550,6 +582,7 @@
   el("next").onclick=function(){go()};
   el("submitCloud").onclick=submitCloud;
   async function submitCloud(){
+    if(PREVIEW)return;
     if(state.cloudSubmissionId){toast("这份答案已经提交");return}
     var completed=tasks.filter(function(t){return hasResponse(t,state.answers[t.id])}).length;
     if(completed<tasks.length&&!confirm("还有 "+(tasks.length-completed)+" 题未作答，仍然提交吗？"))return;
@@ -585,8 +618,8 @@
     status.className="notice";status.style.background="#e7f7ef";status.style.color="#246246";
     status.innerHTML="<b>提交成功。</b> 提交编号："+esc(id)+"。请告知老师后关闭页面。";
   }
-  el("clearData").onclick=function(){if(confirm("确定清除这台设备上的全部作答暂存吗？已成功提交的数据不会从研究数据库删除。")){localStorage.removeItem(KEY);location.reload()}};
-  if(localStorage.getItem(KEY))el("saveState").textContent="发现未提交或已保存的记录";
+  el("clearData").onclick=function(){if(PREVIEW)return;if(confirm("确定清除这台设备上的全部作答暂存吗？已成功提交的数据不会从研究数据库删除。")){localStorage.removeItem(KEY);location.reload()}};
+  if(!PREVIEW&&localStorage.getItem(KEY))el("saveState").textContent="发现未提交或已保存的记录";
 })();
 </script>
 </body>
