@@ -12,10 +12,24 @@ QUESTION_OPTIONS.forEach(q=>{
   const row=document.createElement('div');row.className='question';
   const label=document.createElement('label');label.className='question-name';
   const input=document.createElement('input');input.type='checkbox';input.checked=true;input.name='question';input.value=q.id;
-  const text=document.createElement('span');text.textContent=q.name;label.append(input,text);
+  const position=document.createElement('span');position.className='question-position';
+  const text=document.createElement('span');text.textContent=q.name;label.append(input,position,text);
   const minutes=document.createElement('label');minutes.className='minutes';minutes.append(document.createTextNode('倒计时'));
   const number=document.createElement('input');number.type='number';number.min='1';number.max='180';number.step='1';number.value=String(q.minutes);number.name='minutes';number.setAttribute('aria-label',q.name+'倒计时分钟数');
-  minutes.append(number,document.createTextNode('分钟'));row.append(label,minutes);questions.append(row);
+  const controls=document.createElement('div');controls.className='order-controls';
+  for(const [direction,labelText] of [['up','上移'],['down','下移']]){
+    const button=document.createElement('button');button.type='button';button.className='order-button';button.dataset.direction=direction;button.textContent=labelText;button.setAttribute('aria-label',labelText+q.name);
+    button.addEventListener('click',()=>{
+      const selected=[...questions.querySelectorAll('.question')].filter(r=>r.querySelector('input[name=question]').checked);
+      const index=selected.indexOf(row),other=selected[index+(direction==='up'?-1:1)];
+      if(!other)return;
+      questions.insertBefore(row,direction==='up'?other:other.nextSibling);
+      dirty();
+      (button.disabled?row.querySelector(`[data-direction=${direction==='up'?'down':'up'}]`):button).focus();
+    });
+    controls.append(button);
+  }
+  minutes.append(number,document.createTextNode('分钟'));row.append(label,minutes,controls);questions.append(row);
 });
 const previewSelect=document.querySelector('#preview-target'),previewFrame=document.querySelector('#student-preview');
 const saveButton=document.querySelector('#save-config'),embeddedStatus=document.querySelector('#embedded-status');
@@ -34,7 +48,17 @@ function applySavedPlan(plan){
 function selectedTasks(){
   return [...questions.querySelectorAll('.question')].filter(row=>row.querySelector('input[name=question]').checked).map(row=>({id:row.querySelector('input[name=question]').value,minutes:Number(row.querySelector('input[name=minutes]').value)}));
 }
+function updateOrderControls(){
+  const rows=[...questions.querySelectorAll('.question')],selected=rows.filter(row=>row.querySelector('input[name=question]').checked);
+  for(const row of rows){
+    const index=selected.indexOf(row),chosen=index!==-1;
+    row.querySelector('.question-position').textContent=chosen?`${index+1}.`:'';
+    row.querySelector('[data-direction=up]').disabled=!chosen||index===0;
+    row.querySelector('[data-direction=down]').disabled=!chosen||index===selected.length-1;
+  }
+}
 function syncPreview(){
+  updateOrderControls();
   const tasks=selectedTasks(),old=previewSelect.value;
   const options=[];
   for(const t of tasks){
@@ -98,7 +122,15 @@ saveButton.addEventListener('click',()=>{
     window.parent.postMessage({type:'xiangcheng:save-config',requestId,grades:plan.grades,tasks:plan.tasks},PARENT_ORIGIN);
   }catch(e){embeddedStatus.textContent=e.message;}
 });
-grades.addEventListener('change',dirty);questions.addEventListener('input',dirty);questions.addEventListener('change',dirty);
+grades.addEventListener('change',dirty);questions.addEventListener('input',dirty);questions.addEventListener('change',event=>{
+  if(event.target.name==='question'){
+    const row=event.target.closest('.question');
+    const firstUnchecked=[...questions.querySelectorAll('.question')].find(r=>!r.querySelector('input[name=question]').checked);
+    if(event.target.checked&&firstUnchecked)questions.insertBefore(row,firstUnchecked);
+    else questions.append(row);
+  }
+  dirty();
+});
 document.querySelector('#generate').addEventListener('click',()=>{
   try {
     const gradeValues=selectedGrades();
