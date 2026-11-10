@@ -109,7 +109,7 @@
   var SCHOOL_ID="suzhou_xiangcheng_primary";
   var SCHOOL_NAME="苏州相城小学";
   var LEGACY_INSTRUMENT_VERSION="creativity_assessment_xiangcheng_202611_v1";
-  var INSTRUMENT_VERSION="creativity_assessment_xiangcheng_three_arm_v4";
+  var INSTRUMENT_VERSION="creativity_assessment_xiangcheng_three_arm_v5";
   var GRADE_NAMES=["", "一年级", "二年级", "三年级", "四年级", "五年级", "六年级", "初一", "初二", "初三", "高一", "高二", "高三"];
   var gradeConfig=null;
   var AI_MODEL_GROUP="cloudbase";
@@ -167,7 +167,8 @@
   }
   function isAiCondition(c){return c==="ai"||c==="ai_socratic"||c==="ai_feedback"}
   function promptVersion(c){return (state.meta&&state.meta.aiPromptVersion)||PREVIOUS_PROMPT_VERSIONS[c]||(c==="ai"?AI_PROMPT_VERSION:"")}
-  function isThreeArmVersion(){return /^creativity_assessment_xiangcheng_three_arm_v[234]$/.test(state.meta.instrumentVersion||"")}
+  function isThreeArmVersion(){return /^creativity_assessment_xiangcheng_three_arm_v[2345]$/.test(state.meta.instrumentVersion||"")}
+  function hasSingleInitialIdea(){return state.meta.instrumentVersion===INSTRUMENT_VERSION}
   function conditionLabel(c){return ({initial_only:"初稿组",ai_socratic:"苏格拉底组",ai_feedback:"反馈组",ai:"AI对话",reflection:"提示反思",control:"独立完成"})[c]||"未记录"}
   function uniqCount(a){var seen={};return (a||[]).filter(function(x){var k=String(x).trim().toLowerCase();if(!k||seen[k])return false;seen[k]=1;return true}).length}
   function secondsTotal(){return Math.max(0,Math.round((Date.now()-new Date(state.startedAt).getTime())/1000))}
@@ -231,8 +232,8 @@
   function collaborationAnswer(t){
     var a=state.answers[t.id];
     if(!a||typeof a!=="object"||Array.isArray(a))a={};
-    a.initialIdeas=Array.isArray(a.initialIdeas)?a.initialIdeas:["",""];
-    while(a.initialIdeas.length<2)a.initialIdeas.push("");
+    a.initialIdeas=Array.isArray(a.initialIdeas)?a.initialIdeas:(hasSingleInitialIdea()?[""]:["",""]);
+    while(a.initialIdeas.length<(hasSingleInitialIdea()?1:2))a.initialIdeas.push("");
     a.selectedIdea=a.selectedIdea||"";a.reflection=a.reflection||{weakness:"",improvement:""};a.chat=Array.isArray(a.chat)?a.chat:[];a.finalAnswer=a.finalAnswer||"";a.aiError=a.aiError||"";
     a.finalAnswerHistory=Array.isArray(a.finalAnswerHistory)?a.finalAnswerHistory:[];
     a.finalAnswerEvents=Array.isArray(a.finalAnswerEvents)?a.finalAnswerEvents:[];
@@ -337,7 +338,11 @@
     var phaseNames=state.condition==="initial_only"?[{phase:1,label:"独立构思"}]:state.condition==="control"?[{phase:1,label:"独立构思"},{phase:3,label:"最终方案"},{phase:4,label:"自我评价"}]:[{phase:1,label:"独立构思"},{phase:2,label:"分组活动"},{phase:3,label:"最终方案"},{phase:4,label:"自我评价"}],phaseLine='<div class="phase-line">'+phaseNames.map(function(x,i){var cls=x.phase===a.phase?" active":(x.phase<a.phase?" done":"");return '<span class="phase-dot'+cls+'">'+(i+1)+'. '+x.label+'</span>'}).join("")+'</div>';
     var body="";
     if(a.phase===1){
-      body='<div class="stage"><h3>第一步：独立构思</h3><p>请先独立写出两个初步想法，并选出一个最值得继续发展的想法。提交后将进入下一阶段，不能返回查看或修改本页。</p><div class="twocol"><label><span class="mini-label">初步想法1</span><textarea class="answer collabInitial" data-index="0" style="min-height:110px">'+esc(a.initialIdeas[0])+'</textarea></label><label><span class="mini-label">初步想法2</span><textarea class="answer collabInitial" data-index="1" style="min-height:110px">'+esc(a.initialIdeas[1])+'</textarea></label></div><label><span class="mini-label" style="margin-top:10px">选择一个最值得继续发展的想法</span><textarea class="answer" id="selectedIdea" style="min-height:110px">'+esc(a.selectedIdea)+'</textarea></label><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">提交初步构思，进入下一步</button></div></div>';
+      if(hasSingleInitialIdea()){
+        body='<div class="stage"><h3>第一步：独立构思</h3><p>请先独立写出一个改进毛绒兔的初步方案。提交后将进入下一阶段，不能返回查看或修改本页。</p><label><span class="mini-label">我的初步方案</span><textarea class="answer" id="selectedIdea" style="min-height:110px" placeholder="请写出你的一个想法……">'+esc(a.selectedIdea)+'</textarea></label><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">提交初步构思，进入下一步</button></div></div>';
+      }else{
+        body='<div class="stage"><h3>第一步：独立构思</h3><p>请先独立写出两个初步想法，并选出一个最值得继续发展的想法。提交后将进入下一阶段，不能返回查看或修改本页。</p><div class="twocol"><label><span class="mini-label">初步想法1</span><textarea class="answer collabInitial" data-index="0" style="min-height:110px">'+esc(a.initialIdeas[0])+'</textarea></label><label><span class="mini-label">初步想法2</span><textarea class="answer collabInitial" data-index="1" style="min-height:110px">'+esc(a.initialIdeas[1])+'</textarea></label></div><label><span class="mini-label" style="margin-top:10px">选择一个最值得继续发展的想法</span><textarea class="answer" id="selectedIdea" style="min-height:110px">'+esc(a.selectedIdea)+'</textarea></label><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">提交初步构思，进入下一步</button></div></div>';
+      }
     }else if(a.phase===2&&isAi){
       var chatHtml=a.chat.length?a.chat.map(function(m){return '<div class="msg '+(m.role==="assistant"?"ai":"user")+'">'+esc(m.content)+"</div>"}).join(""):'<div class="chatempty">还没有对话。你可以从自己想讨论的内容开始。</div>';
       var hasAiReply=a.chat.some(function(m){return m.role==="assistant"});
@@ -421,7 +426,7 @@
       var version=promptVersion(state.condition);
       var system=state.condition==="ai_socratic"?(version===PREVIOUS_PROMPT_VERSIONS.ai_socratic?oldSocratic:version===DRAFT_PROMPT_VERSIONS.ai_socratic?draftSocratic:socratic):state.condition==="ai_feedback"?(version===PREVIOUS_PROMPT_VERSIONS.ai_feedback?oldFeedback:version===DRAFT_PROMPT_VERSIONS.ai_feedback?draftFeedback:feedback):"你是面向"+(GRADE_NAMES[Number(state.meta.grade)]||"学生")+"学生的创造性思维伙伴，任务是帮助学生完善毛绒兔玩具的改进方案。先回应学生刚说的内容，给出一个具体、简短的反馈；不要代替学生完成最终答案。学生主动提出问题时，先直接回答，不要用反问代替回答。只有学生主动请求建议或明显遇到困难时，才提供1—2个启发方向，不要求学生必须采纳。鼓励学生自行判断，并说明理由。语言友好、简短，每次不超过140个汉字，不索要或复述个人信息。"+
         (firstReply?"这是你第一次回复。只有确实有助于学生检查创意性、实用性或安全性时，才在反馈后提出最多一个简短、具体的问题；也可以完全不提问。":"你已经回复过学生。从本次起不要主动追问，不使用疑问句或问号。直接回答学生的问题，或就其新想法给出具体反馈。不要要求学生继续回答；适合时提醒学生可以自行结束讨论并形成最终方案。");
-      var context="任务：改进普通毛绒兔玩具，使它更有趣、有创意、安全且可行。学生的初步想法：1."+a.initialIdeas[0]+"；2."+a.initialIdeas[1]+"。学生选择继续发展的想法："+a.selectedIdea;
+      var context=hasSingleInitialIdea()?"任务：改进普通毛绒兔玩具，使它更有趣、有创意、安全且可行。学生的初稿方案："+a.selectedIdea:"任务：改进普通毛绒兔玩具，使它更有趣、有创意、安全且可行。学生的初步想法：1."+a.initialIdeas[0]+"；2."+a.initialIdeas[1]+"。学生选择继续发展的想法："+a.selectedIdea;
       var messages=[{role:"system",content:system},{role:"user",content:context}].concat(a.chat.map(function(m){return{role:m.role,content:m.content}}));
       var result=await model.generateText({model:AI_MODEL_NAME,reasoning_effort:"none",messages:messages});
       var reply=result&&result.text?String(result.text).trim():"";if(!reply)throw new Error("没有收到有效回复");
@@ -446,7 +451,7 @@
     else if(t.type==="collaboration"){
       var c=collaborationAnswer(t),initial=document.querySelectorAll(".collabInitial");
       if(initial.length)c.initialIdeas=Array.prototype.map.call(initial,function(x){return x.value.trim()});
-      if(el("selectedIdea"))c.selectedIdea=el("selectedIdea").value.trim();
+      if(el("selectedIdea")){c.selectedIdea=el("selectedIdea").value.trim();if(hasSingleInitialIdea())c.initialIdeas=[c.selectedIdea]}
       if(el("reflectionWeakness"))c.reflection.weakness=el("reflectionWeakness").value.trim();
       if(el("reflectionImprovement"))c.reflection.improvement=el("reflectionImprovement").value.trim();
       if(el("finalAnswer")){c.finalAnswer=el("finalAnswer").value.trim();addFinalAnswerVersion(c,c.finalAnswer,"capture")}
@@ -489,7 +494,7 @@
         if(!String(a.finalAnswer||"").trim()){blank+=1;add(t.id,"strong","missing_final_answer");return}
         if(meaningfulLength(a.finalAnswer)<20)add(t.id,"strong","very_short_final_answer");
         else if(meaningfulLength(a.finalAnswer)<40)add(t.id,"concern","short_final_answer");
-        if(uniqCount(a.initialIdeas)<2||meaningfulLength(a.selectedIdea)<6)add(t.id,"concern","incomplete_idea_development");
+        if((!hasSingleInitialIdea()&&uniqCount(a.initialIdeas)<2)||meaningfulLength(a.selectedIdea)<6)add(t.id,"concern","incomplete_idea_development");
         if(state.condition==="reflection"){
           if(meaningfulLength(a.reflection&&a.reflection.weakness)<5||meaningfulLength(a.reflection&&a.reflection.improvement)<8)add(t.id,"concern","limited_reflection");
         }else if(isAiCondition(state.condition)){
@@ -532,7 +537,7 @@
       a=a||{};var last=a.lastResult||{};return ["题号：P1M128","代码块数："+(last.blocks==null?(1+clawBlockCount(a.program||[])):last.blocks),"运行/单步尝试次数："+((a.runs||[]).length),"达到目标状态："+(last.completed?"是":"否"),"最高正确归位数："+(last.correct==null?0:last.correct)+" / 12","PISA评分代码："+(last.score==null?0:last.score)].join("\n");
     }
     if(t.type==="collaboration"){
-      a=a||{};var lines=["随机方式："+conditionLabel(state.condition),"初步想法："+((a.initialIdeas||[]).filter(Boolean).join("；")||"（未填写）"),"选定想法："+(a.selectedIdea||"（未填写）")];
+      a=a||{};var lines=["随机方式："+conditionLabel(state.condition)];if(hasSingleInitialIdea())lines.push("初稿方案："+(a.selectedIdea||"（未填写）"));else lines.push("初步想法："+((a.initialIdeas||[]).filter(Boolean).join("；")||"（未填写）"),"选定想法："+(a.selectedIdea||"（未填写）"));
       if(isAiCondition(state.condition))lines.push("AI对话："+((a.chat||[]).map(function(m){return(m.role==="assistant"?"AI":"学生")+"："+m.content}).join("\n")||"（无对话）"));
       else if(state.condition==="reflection")lines.push("发现的不足："+((a.reflection&&a.reflection.weakness)||"（未填写）"),"改进思路："+((a.reflection&&a.reflection.improvement)||"（未填写）"));
       else lines.push("辅助过程：未提供AI或反思提示");
@@ -583,7 +588,7 @@
   }
   function download(name,type,text){var blob=new Blob(["\ufeff"+text],{type:type});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url)},500)}
   function dlCsv(){capture();var o=rowData(),heads=Object.keys(o),line=heads.map(function(k){return csvCell(o[k])}).join(",");download("creativity_"+safeName(state.meta.studentId)+".csv","text/csv;charset=utf-8",heads.join(",")+"\n"+line)}
-  function dlJson(){download("creativity_"+safeName(state.meta.studentId)+".json","application/json;charset=utf-8",JSON.stringify({instrument:INSTRUMENT_VERSION,exportedAt:new Date().toISOString(),data:rowData(),raw:state},null,2))}
+  function dlJson(){download("creativity_"+safeName(state.meta.studentId)+".json","application/json;charset=utf-8",JSON.stringify({instrument:state.meta.instrumentVersion||LEGACY_INSTRUMENT_VERSION,exportedAt:new Date().toISOString(),data:rowData(),raw:state},null,2))}
   function safeName(s){return String(s||"student").replace(/[^a-zA-Z0-9_-]/g,"_")}
   // 教师预览复用真实题目和渲染函数，但不读取云配置、不写暂存、不允许交互提交。
   if(PREVIEW){
@@ -598,7 +603,7 @@
         var phase=event.data.phase, condition=event.data.condition;
         if(![1,2,3,4].includes(phase))phase=1;
         if(!["ai","reflection","control","initial_only","ai_socratic","ai_feedback"].includes(condition))condition="initial_only";
-        state={meta:{},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:index,condition:condition,startedAt:new Date().toISOString(),submittedAt:null};
+        state={meta:{instrumentVersion:INSTRUMENT_VERSION},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:index,condition:condition,startedAt:new Date().toISOString(),submittedAt:null};
         if(tasks[index].type==="collaboration")state.answers[tasks[index].id]={phase:phase};
         show("test");render();
         // Read-only preview: never allow sending AI requests, saving, or progressing.

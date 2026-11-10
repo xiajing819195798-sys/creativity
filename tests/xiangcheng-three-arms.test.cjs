@@ -9,14 +9,15 @@ function harness(randomValues=[0]) {
   let script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>s.includes('function assignmentInfo'));
   assert.ok(script);
   script=script.replace('  // 教师预览复用真实题目和渲染函数', `
-    window.testApi={setState:s=>{state=s},getState:()=>state,setTasks:t=>{tasks=t},newAssignment,advanceCollaborationPhase,hasResponse,rowData,
-      setCloud:fn=>{getCloudApp=fn},sendAiMessage,quiet:()=>{save=()=>{};render=()=>{};finish=()=>{};capture=()=>{}}};
+    window.testApi={setState:s=>{state=s},getState:()=>state,setTasks:t=>{tasks=t},newAssignment,advanceCollaborationPhase,hasResponse,rowData,renderCollaboration,
+      setCloud:fn=>{getCloudApp=fn},sendAiMessage,quiet:()=>{save=()=>{};render=()=>{};finish=()=>{};toast=()=>{}}};
     return;
   // 教师预览复用真实题目和渲染函数`);
   const elements={chatInput:{value:'你觉得我的设计怎么样？'}};
   const context={window:{location:{search:''},crypto:{getRandomValues:a=>{a[0]=randomValues.shift()??0;return a}}},document:{getElementById:id=>elements[id]||null,querySelectorAll:()=>[]},Uint32Array,Set,Date,Math,JSON,Number,String,Array,Object,console,clearTimeout:()=>{},setTimeout:()=>0};
   vm.runInNewContext(script,context);
   context.window.testApi.quiet();
+  context.window.testApi.setInput=(id,value)=>{elements[id]={value}};
   return context.window.testApi;
 }
 const bunny={id:'human_ai_bunny',type:'collaboration',mins:20};
@@ -27,6 +28,37 @@ test('纸盒题不再是学生端可选任务',()=>{
   assert.doesNotMatch(config,/aut_box_transfer/);
 });
 function state(condition) {return {meta:{studentId:'T1',grade:'5',classCode:'1',instrumentVersion:'creativity_assessment_xiangcheng_three_arm_v2',gradeConfigVersion:'v1',assessmentTasks:[bunny]},answers:{human_ai_bunny:{initialIdeas:['软软的兔子','会唱歌的兔子'],selectedIdea:'软软的兔子',chat:[],phase:1,phaseStartElapsed:0}},taskStarted:{},taskDeadline:{},taskSeconds:{human_ai_bunny:10},current:0,condition,startedAt:'2026-01-01T00:00:00Z'};}
+
+test('新作答只填一个初稿，旧会话仍按原版显示',()=>{
+  for(const condition of ['initial_only','ai_socratic','ai_feedback']){
+    const h=harness(),s=state(condition);s.meta.instrumentVersion='creativity_assessment_xiangcheng_three_arm_v5';
+    s.answers.human_ai_bunny.initialIdeas=[];s.answers.human_ai_bunny.selectedIdea='';
+    h.setTasks([bunny,{id:'anchor_2983',type:'text',mins:3}]);h.setState(s);
+    const area={innerHTML:'',querySelectorAll:()=>[]};h.renderCollaboration(area,bunny);
+    assert.equal((area.innerHTML.match(/<textarea/g)||[]).length,1);
+    assert.match(area.innerHTML,/写出一个改进毛绒兔/);
+    h.advanceCollaborationPhase(bunny);assert.equal(s.answers.human_ai_bunny.phase,1);
+    h.setInput('selectedIdea','让兔子能播放自己录下的故事');h.advanceCollaborationPhase(bunny);
+    const a=s.answers.human_ai_bunny;
+    assert.deepEqual(Array.from(a.initialSnapshot.initialIdeas),['让兔子能播放自己录下的故事']);
+    assert.equal(a.initialSnapshot.selectedIdea,'让兔子能播放自己录下的故事');
+    if(condition==='initial_only')assert.equal(a.finalStatus,'not_applicable');
+    else assert.equal(a.phase,2);
+    const row=h.rowData();assert.equal(row.instrument_version,'creativity_assessment_xiangcheng_three_arm_v5');
+    assert.equal(row.human_ai_bunny_selected_idea,'让兔子能播放自己录下的故事');
+  }
+  const h=harness(),s=state('ai_socratic');s.meta.instrumentVersion='creativity_assessment_xiangcheng_three_arm_v4';h.setState(s);
+  const area={innerHTML:'',querySelectorAll:()=>[]};h.renderCollaboration(area,bunny);
+  assert.equal((area.innerHTML.match(/<textarea/g)||[]).length,3);assert.match(area.innerHTML,/两个初步想法/);
+});
+
+test('新版 AI 上下文只包含单个初稿',async()=>{
+  const h=harness(),s=state('ai_socratic');s.meta.instrumentVersion='creativity_assessment_xiangcheng_three_arm_v5';s.meta.aiPromptVersion='bunny_socratic_v3_20261110';
+  s.answers.human_ai_bunny.initialIdeas=['让兔子说故事'];s.answers.human_ai_bunny.selectedIdea='让兔子说故事';s.answers.human_ai_bunny.phase=2;
+  h.setTasks([bunny]);h.setState(s);let context='';
+  h.setCloud(()=>({ai:()=>({createModel:()=>({generateText:async({messages})=>{context=messages[1].content;return {text:'谁会喜欢这个故事？'}}})})}));
+  await h.sendAiMessage();assert.match(context,/学生的初稿方案：让兔子说故事/);assert.doesNotMatch(context,/学生的初步想法：1\./);
+});
 
 test('随机分配可进入三组，初稿组无伪造终稿',()=>{
   const h=harness([0,1,0,2,1]);
