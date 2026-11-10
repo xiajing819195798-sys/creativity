@@ -109,13 +109,14 @@
   var SCHOOL_ID="suzhou_xiangcheng_primary";
   var SCHOOL_NAME="苏州相城小学";
   var LEGACY_INSTRUMENT_VERSION="creativity_assessment_xiangcheng_202611_v1";
-  var INSTRUMENT_VERSION="creativity_assessment_xiangcheng_three_arm_v2";
+  var INSTRUMENT_VERSION="creativity_assessment_xiangcheng_three_arm_v3";
   var GRADE_NAMES=["", "一年级", "二年级", "三年级", "四年级", "五年级", "六年级", "初一", "初二", "初三", "高一", "高二", "高三"];
   var gradeConfig=null;
   var AI_MODEL_GROUP="cloudbase";
   var AI_MODEL_NAME="hy4-preview";
   var AI_PROMPT_VERSION="bunny_feedback_v2_xiangcheng_grade_202611";
-  var PROMPT_VERSIONS={ai_socratic:"bunny_socratic_v1_20261110",ai_feedback:"bunny_feedback_v3_20261110"};
+  var PREVIOUS_PROMPT_VERSIONS={ai_socratic:"bunny_socratic_v1_20261110",ai_feedback:"bunny_feedback_v3_20261110"};
+  var PROMPT_VERSIONS={ai_socratic:"bunny_socratic_v2_20261110",ai_feedback:"bunny_feedback_v4_20261110"};
   // ===== 题目文案编辑区：每题的 title、tag、mins、prompt 和 hint 都可在这里修改。 =====
   var tasks=[
     {id:"anchor_illustration_titles",title:"插图标题",tag:"锚题 · 产生多样想法",mins:5,type:"ideas",minIdeas:3,maxIdeas:3,prompt:"请为上面这幅插图设计出三个彼此明显不同的标题。",hint:"标题可以关注不同事物，也可以用不同角度或表达方式理解这幅图。",figure:'<div class="stimulus"><svg viewBox="0 0 640 340" role="img" aria-label="一本巨大的书位于自然环境中"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dff5ef"/><stop offset="1" stop-color="#fff7dc"/></linearGradient></defs><rect width="640" height="340" rx="22" fill="url(#sky)"/><circle cx="532" cy="70" r="34" fill="#f2b84b" opacity=".8"/><path d="M0 238 Q130 178 265 236 T640 224 V340 H0Z" fill="#91c7a7"/><path d="M0 272 Q145 220 300 280 T640 265 V340 H0Z" fill="#4f9d88"/><path d="M145 250 Q235 188 320 246 Q407 188 500 250 L475 304 Q397 274 320 311 Q242 274 166 304Z" fill="#fffdf7" stroke="#126e68" stroke-width="7"/><path d="M320 246 V311" stroke="#126e68" stroke-width="5"/><path d="M314 235 C296 188 301 142 326 101 C351 143 357 188 326 237Z" fill="#58a99f"/><path d="M326 161 C283 150 260 124 251 90 C291 92 319 113 326 161Z" fill="#7ec3a6"/><path d="M326 179 C370 164 398 136 409 99 C367 102 338 128 326 179Z" fill="#6db58f"/><g fill="#fff"><circle cx="88" cy="82" r="20"/><circle cx="111" cy="73" r="27"/><circle cx="139" cy="84" r="20"/></g></svg></div>'},
@@ -160,7 +161,8 @@
     return {condition:groups[values[0]%3],method:"browser_simple_random_three_arm_v1",stratum_grade:String(grade||""),assigned_at:new Date().toISOString()};
   }
   function isAiCondition(c){return c==="ai"||c==="ai_socratic"||c==="ai_feedback"}
-  function promptVersion(c){return PROMPT_VERSIONS[c]||(c==="ai"?AI_PROMPT_VERSION:"")}
+  function promptVersion(c){return (state.meta&&state.meta.aiPromptVersion)||PREVIOUS_PROMPT_VERSIONS[c]||(c==="ai"?AI_PROMPT_VERSION:"")}
+  function isThreeArmVersion(){return /^creativity_assessment_xiangcheng_three_arm_v[23]$/.test(state.meta.instrumentVersion||"")}
   function conditionLabel(c){return ({initial_only:"初稿组",ai_socratic:"苏格拉底组",ai_feedback:"反馈组",ai:"AI对话",reflection:"提示反思",control:"独立完成"})[c]||"未记录"}
   function uniqCount(a){var seen={};return (a||[]).filter(function(x){var k=String(x).trim().toLowerCase();if(!k||seen[k])return false;seen[k]=1;return true}).length}
   function secondsTotal(){return Math.max(0,Math.round((Date.now()-new Date(state.startedAt).getTime())/1000))}
@@ -192,7 +194,7 @@
     if(!gradeConfig||gradeConfig.allowed_grades.indexOf(Number(grade))<0){toast("请选择本次开放的年级");return}
     if(!sid||!grade||!cc){toast("请填写编号、年级和班级代码");return}
     if(!el("consent").checked){toast("请先阅读并勾选说明");return}
-    var assignment=newAssignment(grade);state={meta:{studentId:sid,grade:grade,classCode:cc,instrumentVersion:INSTRUMENT_VERSION,gradeConfigVersion:gradeConfig.version,assessmentTasks:gradeConfig.assessment_tasks},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,condition:assignment.condition,assignment:assignment,startedAt:new Date().toISOString(),submittedAt:null};
+    var assignment=newAssignment(grade);state={meta:{studentId:sid,grade:grade,classCode:cc,instrumentVersion:INSTRUMENT_VERSION,aiPromptVersion:PROMPT_VERSIONS[assignment.condition]||"",gradeConfigVersion:gradeConfig.version,assessmentTasks:gradeConfig.assessment_tasks},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,condition:assignment.condition,assignment:assignment,startedAt:new Date().toISOString(),submittedAt:null};
     save();show("test");render();startTimer();
   }
   function render(){
@@ -404,17 +406,20 @@
     try{
       var model=getCloudApp().ai().createModel(AI_MODEL_GROUP);
       var firstReply=!a.chat.some(function(m){return m.role==="assistant"});
-      var socratic="你是面向"+(GRADE_NAMES[Number(state.meta.grade)]||"学生")+"学生的创造性思维伙伴，帮助学生改进毛绒兔。先理解并简短回应学生的具体意思，再提出至多一个简短、适龄的问题，帮助学生自主澄清想法、解释理由、比较不同可能或检查实现与安全。一次只聚焦一个方面，依据学生的回答灵活推进，不机械连续追问。学生直接提问时，先给简短明确的事实性回答；遇到明显困难时可以给一个开放提示。不要替学生生成完整最终方案，不索要个人信息，每次不超过140个汉字。";
-      var feedback="你是面向"+(GRADE_NAMES[Number(state.meta.grade)]||"学生")+"学生的创造性思维伙伴，帮助学生改进毛绒兔。先针对学生刚说的具体想法，给出简短、具体的反馈，指出一个优点、需要考虑的地方或可改进方向，并说明原因，兼顾新颖、使用和安全；学生提出问题时直接回答。把最终决定留给学生，不提供完整可直接提交的方案，不主动追问，不索要个人信息，每次不超过140个汉字。";
-      var system=state.condition==="ai_socratic"?socratic:state.condition==="ai_feedback"?feedback:"你是面向"+(GRADE_NAMES[Number(state.meta.grade)]||"学生")+"学生的创造性思维伙伴，任务是帮助学生完善毛绒兔玩具的改进方案。先回应学生刚说的内容，给出一个具体、简短的反馈；不要代替学生完成最终答案。学生主动提出问题时，先直接回答，不要用反问代替回答。只有学生主动请求建议或明显遇到困难时，才提供1—2个启发方向，不要求学生必须采纳。鼓励学生自行判断，并说明理由。语言友好、简短，每次不超过140个汉字，不索要或复述个人信息。"+
+      var age=GRADE_NAMES[Number(state.meta.grade)]||"学生",version=promptVersion(state.condition);
+      var oldSocratic="你是面向"+age+"学生的创造性思维伙伴，帮助学生改进毛绒兔。先理解并简短回应学生的具体意思，再提出至多一个简短、适龄的问题，帮助学生自主澄清想法、解释理由、比较不同可能或检查实现与安全。一次只聚焦一个方面，依据学生的回答灵活推进，不机械连续追问。学生直接提问时，先给简短明确的事实性回答；遇到明显困难时可以给一个开放提示。不要替学生生成完整最终方案，不索要个人信息，每次不超过140个汉字。";
+      var oldFeedback="你是面向"+age+"学生的创造性思维伙伴，帮助学生改进毛绒兔。先针对学生刚说的具体想法，给出简短、具体的反馈，指出一个优点、需要考虑的地方或可改进方向，并说明原因，兼顾新颖、使用和安全；学生提出问题时直接回答。把最终决定留给学生，不提供完整可直接提交的方案，不主动追问，不索要个人信息，每次不超过140个汉字。";
+      var socratic="你是面向"+age+"学生的苏格拉底式创造性思维伙伴，帮助学生改进毛绒兔玩具。你的主要任务是持续追问，而不是给出评价或替学生设计。每次先理解学生刚说的内容，必要时用一句简短的话回应，然后紧扣该内容提出一个具体、开放的问题；学生继续回答后，再根据新回答提出下一个问题，直到学生自行结束讨论。每轮只问一个问题，不重复已问过的问题，也不要一次列出多个问题。可根据对话需要追问：想法的用途和使用者、与常见玩具的不同、其他可能、选择的理由、实现方式、使用安全或可以怎样进一步完善；每次只选一个方面，不必按固定顺序。学生说不知道时，将问题换成更简单、更容易回答的问题。学生直接询问事实或安全问题时，先简短回答，再用一个问题引导其思考；如果要求你直接生成方案或替他选择，应通过问题引导他自己决定。尊重学生结束对话的意愿。不要代写最终方案，不索要个人信息；语言友好、适合该年级，每次不超过140个汉字。";
+      var feedback="你是面向"+age+"学生的创造性思维伙伴，帮助学生改进毛绒兔玩具。你的主要任务是针对学生刚说的具体内容给出反馈，而不是持续提问。每次指出学生方案中一个可以辨认的功能、用途、实现方式或细节，说明它的特点、可能的不足或需要注意的地方，并给出一条与该内容直接相关的改进建议。反馈可以关注新颖性、使用价值、实现方式、安全或细节，每轮只聚焦一两个相关方面，不必每次面面俱到。说明判断的原因，不只说‘很好’或‘更有创意’，也不要编造学生没有说过的内容；无法确认的技术和安全问题不要说得过于肯定。学生提问时直接回答，并结合其方案给出反馈。不主动提出追问，不要求学生逐一回答问题；不代写可以直接提交的完整方案，最终决定由学生自己作出。不要索要个人信息；语言友好、适合该年级，每次不超过140个汉字。";
+      var system=state.condition==="ai_socratic"?(version===PREVIOUS_PROMPT_VERSIONS.ai_socratic?oldSocratic:socratic):state.condition==="ai_feedback"?(version===PREVIOUS_PROMPT_VERSIONS.ai_feedback?oldFeedback:feedback):"你是面向"+(GRADE_NAMES[Number(state.meta.grade)]||"学生")+"学生的创造性思维伙伴，任务是帮助学生完善毛绒兔玩具的改进方案。先回应学生刚说的内容，给出一个具体、简短的反馈；不要代替学生完成最终答案。学生主动提出问题时，先直接回答，不要用反问代替回答。只有学生主动请求建议或明显遇到困难时，才提供1—2个启发方向，不要求学生必须采纳。鼓励学生自行判断，并说明理由。语言友好、简短，每次不超过140个汉字，不索要或复述个人信息。"+
         (firstReply?"这是你第一次回复。只有确实有助于学生检查创意性、实用性或安全性时，才在反馈后提出最多一个简短、具体的问题；也可以完全不提问。":"你已经回复过学生。从本次起不要主动追问，不使用疑问句或问号。直接回答学生的问题，或就其新想法给出具体反馈。不要要求学生继续回答；适合时提醒学生可以自行结束讨论并形成最终方案。");
       var context="任务：改进普通毛绒兔玩具，使它更有趣、有创意、安全且可行。学生的初步想法：1."+a.initialIdeas[0]+"；2."+a.initialIdeas[1]+"。学生选择继续发展的想法："+a.selectedIdea;
       var messages=[{role:"system",content:system},{role:"user",content:context}].concat(a.chat.map(function(m){return{role:m.role,content:m.content}}));
       var result=await model.generateText({model:AI_MODEL_NAME,reasoning_effort:"none",messages:messages});
-      var reply=result&&result.text?String(result.text).trim():"";if(!reply)throw new Error("没有收到有效回复");
+      var reply=result&&result.text?String(result.text).trim():"";if(!reply)throw new Error("没有收到有效回复");var rawModelReply=reply;
       var studentAsks=/[？?]|请问|怎么|如何|为什么|能不能|可不可以|请帮|帮我|给.{0,8}建议/.test(message);
       reply=constrainAiReply(reply,state.condition==="ai_socratic"?true:(state.condition==="ai_feedback"?false:firstReply&&!studentAsks));
-      a.chat.push({role:"assistant",content:reply,at:new Date().toISOString(),model:AI_MODEL_NAME,promptVersion:promptVersion(state.condition),responseId:"ai_"+Date.now().toString(36)});
+      a.chat.push({role:"assistant",content:reply,rawModelContent:rawModelReply,visibleQuestionMarks:(reply.match(/[？?]/g)||[]).length,at:new Date().toISOString(),model:AI_MODEL_NAME,promptVersion:version,responseId:"ai_"+Date.now().toString(36)});
     }catch(err){console.error(err);a.aiError=String((err&&err.message)||err||"服务不可用").slice(0,180)}
     aiBusy=false;save();render();
   }
@@ -499,7 +504,7 @@
         }else if(t.id==="anchor_2983"){
           if(total<15||String(a).indexOf("2983")<0)add(t.id,"strong","insufficient_story");
           else if(total<30)add(t.id,"concern","short_story");
-        }else if(t.id==="aut_cup"&&state.meta.instrumentVersion!==INSTRUMENT_VERSION){
+        }else if(t.id==="aut_cup"&&!isThreeArmVersion()){
           if(uniqCount(a)<2||total<8)add(t.id,"strong","insufficient_uses");
           else if(uniqCount(a)<4)add(t.id,"concern","fewer_than_four_uses");
         }
@@ -508,7 +513,7 @@
     });
     var recorded=Object.keys(state.taskSeconds||{}).reduce(function(n,k){return n+(Number(state.taskSeconds[k])||0)},0);
     if(recorded>0&&recorded<180)add("overall","concern","very_short_total_time");
-    var needs=state.meta.instrumentVersion===INSTRUMENT_VERSION?null:(tasks.length===4?(blank>=2||invalid>=2||strong>=2||(strong>=1&&concerns>=3)):null);
+    var needs=isThreeArmVersion()?null:(tasks.length===4?(blank>=2||invalid>=2||strong>=2||(strong>=1&&concerns>=3)):null);
     return {version:"effort_screen_v1",needs_second_round:needs,automatic_screen:needs!==null,strong_signal_count:strong,concern_count:concerns,blank_task_count:blank,invalid_text_task_count:invalid,recorded_task_seconds:recorded,reason_codes:checks.map(function(x){return x.code}),task_checks:checks,assessed_at:new Date().toISOString()};
   }
   function answerText(t,a){
@@ -547,7 +552,7 @@
         a=a||{};var last=a.lastResult||{};
         o[t.id+"_response"]=JSON.stringify({item:"P1M128",program:a.program||[],blocks:last.blocks==null?(1+clawBlockCount(a.program||[])):last.blocks,completed:!!last.completed,max_correct:last.correct||0,score:last.score||0});
         o[t.id+"_program_json"]=JSON.stringify(a.program||[]);o[t.id+"_runs_json"]=JSON.stringify(a.runs||[]);o[t.id+"_events_json"]=JSON.stringify(a.events||[]);o[t.id+"_run_count"]=(a.runs||[]).length;o[t.id+"_completed"]=!!last.completed;o[t.id+"_block_count"]=last.blocks==null?(1+clawBlockCount(a.program||[])):last.blocks;o[t.id+"_max_correct"]=last.correct||0;o[t.id+"_score"]=last.score||0;
-      }else{o[t.id+"_response"]=Array.isArray(a)?a.filter(Boolean).join(" | "):(a||"");if(t.type==="ideas"){o[t.id+"_ideas_json"]=JSON.stringify(Array.isArray(a)?a:[]);if(state.meta.instrumentVersion===INSTRUMENT_VERSION)o[t.id+"_raw_unique_exact"]=uniqCount(a);else o[t.id+"_fluency_unique"]=uniqCount(a)}}
+      }else{o[t.id+"_response"]=Array.isArray(a)?a.filter(Boolean).join(" | "):(a||"");if(t.type==="ideas"){o[t.id+"_ideas_json"]=JSON.stringify(Array.isArray(a)?a:[]);if(isThreeArmVersion())o[t.id+"_raw_unique_exact"]=uniqCount(a);else o[t.id+"_fluency_unique"]=uniqCount(a)}}
       o[t.id+"_seconds"]=state.taskSeconds[t.id]||0;o[t.id+"_flexibility_human"]="";o[t.id+"_originality_human"]="";o[t.id+"_appropriateness_human"]="";
     });
     var collab=state.answers.human_ai_bunny||{},chat=Array.isArray(collab.chat)?collab.chat:[];
