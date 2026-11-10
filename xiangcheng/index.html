@@ -682,7 +682,7 @@
       if(isAiCondition(state.condition))lines.push("AI对话："+((a.chat||[]).map(function(m){return(m.role==="assistant"?"AI":"学生")+"："+m.content}).join("\n")||"（无对话）"));
       else if(state.condition==="reflection")lines.push("发现的不足："+((a.reflection&&a.reflection.weakness)||"（未填写）"),"改进思路："+((a.reflection&&a.reflection.improvement)||"（未填写）"));
       else lines.push("辅助过程：未提供AI或反思提示");
-      lines.push(state.condition==="initial_only"?"最终方案：不适用（初稿组按设计不作终稿）":"最终方案："+(a.finalAnswer||"（未作答）"));if(state.condition==="initial_only")return lines.join("\n");if(state.condition==="control")lines.push("分组活动：按实验设计跳过");var m=a.meta||{};lines.push("自评方案质量："+(m.quality||"未填写"),"努力程度："+(m.effort||"未填写"),"困难程度："+(m.difficulty||"未填写"),"监控与调整策略："+((m.strategies||[]).join("、")||"未填写"));if(m.confidence)lines.push("自评把握程度："+m.confidence);if(m.strength)lines.push("认为最成功之处："+m.strength);if(m.gap)lines.push("认为仍需改进之处："+m.gap);return lines.join("\n");
+      lines.push(state.condition==="initial_only"?"最终方案：不适用（初稿组按设计不作终稿）":"最终方案："+(a.finalAnswer||"（未作答）"));if(state.condition==="initial_only")return lines.join("\n");if(state.condition==="control")lines.push("分组活动：按实验设计跳过");var m=a.meta||{};lines.push("自评方案质量："+(m.quality||"未填写"),"努力程度："+(m.effort||"未填写"),"困难程度："+(m.difficulty||"未填写"));if((m.strategies||[]).length)lines.push("监控与调整策略："+m.strategies.join("、"));if(m.confidence)lines.push("自评把握程度："+m.confidence);if(m.strength)lines.push("认为最成功之处："+m.strength);if(m.gap)lines.push("认为仍需改进之处："+m.gap);return lines.join("\n");
     }
     return Array.isArray(a)?a.filter(Boolean).map(function(x,j){return(j+1)+". "+x}).join("\n"):(a||"");
   }
