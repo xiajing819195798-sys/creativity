@@ -127,12 +127,14 @@
     {id:"anchor_illustration_titles",title:"插图标题",tag:"锚题 · 产生多样想法",mins:5,type:"ideas",minIdeas:3,maxIdeas:3,prompt:"请为上面这幅插图设计出三个彼此明显不同的标题。",hint:"标题可以关注不同事物，也可以用不同角度或表达方式理解这幅图。",figure:'<div class="stimulus"><svg viewBox="0 0 640 340" role="img" aria-label="一本巨大的书位于自然环境中"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dff5ef"/><stop offset="1" stop-color="#fff7dc"/></linearGradient></defs><rect width="640" height="340" rx="22" fill="url(#sky)"/><circle cx="532" cy="70" r="34" fill="#f2b84b" opacity=".8"/><path d="M0 238 Q130 178 265 236 T640 224 V340 H0Z" fill="#91c7a7"/><path d="M0 272 Q145 220 300 280 T640 265 V340 H0Z" fill="#4f9d88"/><path d="M145 250 Q235 188 320 246 Q407 188 500 250 L475 304 Q397 274 320 311 Q242 274 166 304Z" fill="#fffdf7" stroke="#126e68" stroke-width="7"/><path d="M320 246 V311" stroke="#126e68" stroke-width="5"/><path d="M314 235 C296 188 301 142 326 101 C351 143 357 188 326 237Z" fill="#58a99f"/><path d="M326 161 C283 150 260 124 251 90 C291 92 319 113 326 161Z" fill="#7ec3a6"/><path d="M326 179 C370 164 398 136 409 99 C367 102 338 128 326 179Z" fill="#6db58f"/><g fill="#fff"><circle cx="88" cy="82" r="20"/><circle cx="111" cy="73" r="27"/><circle cx="139" cy="84" r="20"/></g></svg></div>'},
     {id:"anchor_2983",title:"数字故事：2983",tag:"锚题 · 产生创造性想法",mins:6,type:"text",prompt:"学校将举办一次创意故事展。请根据数字“2983”想出一个有趣而不同寻常的故事构想。用几句话说明故事发生了什么，并让数字2983成为故事中的重要内容。",hint:"尽量写得清楚、完整，并让想法与常见答案有所不同。"},
     {id:"aut_cup",title:"纸杯的新用途",tag:"AUT · 发散思维",mins:3,type:"ideas",minIdeas:1,maxIdeas:200,prompt:"纸杯除了用来喝水，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。不要只换一种饮料；用途越多样越好。"},
-    {id:"human_ai_bunny",title:"改进毛绒兔玩具",tag:"随机任务 · 人机创造",mins:20,type:"collaboration",prompt:"现在有一个普通的毛绒玩具，请提出一个改进方案，让它变得更加有趣、更有创意。",hint:"先写出自己的想法；随后系统会随机分配完成方式。"}
+    {id:"human_ai_bunny",title:"改进毛绒兔玩具",tag:"随机任务 · 人机创造",mins:20,type:"collaboration",prompt:"现在有一个普通的毛绒玩具，请提出一个改进方案，让它变得更加有趣、更有创意。",hint:"先写出自己的想法；随后系统会随机分配完成方式。"},
+    {id:"ice_cream_melting",title:"冰淇淋融化了怎么办？",tag:"情境题 · 创造性问题解决",mins:10,type:"ice_cream",prompt:"天气很热，买来的冰淇淋在回家路上容易融化。请想出让冰淇淋在路上融化得慢一些的方法，并说明你的想法。",hint:"先提出多个想法，再选择一个想法，写出具体方案。"}
   ];
   // ===== 题目图片编辑区：图片文件放在 assets/images/，修改 src 即可更换。 =====
   tasks[0].figure='<div class="stimulus"><img src="../assets/images/comic-title.png" alt="漫画标题题目图片：灯泡中的地球"></div>';
   tasks[1].figure='<div class="stimulus"><img src="../assets/images/story-2983.png" alt="数字故事2983题目图片：封面写有2983的橙色书本"></div>';
   tasks[3].figure='<div class="stimulus"><img src="../assets/images/plush-rabbit.webp" alt="一只普通的浅米色毛绒兔玩具"></div>';
+  tasks[4].figure='<div class="stimulus"><img src="../assets/images/ice-cream-melting.png" alt="夏天一盒冰淇淋在路上可能融化的情境插画"></div>';
   var allTasks=tasks.slice();
   function applyTaskPlan(plan){
     if(!Array.isArray(plan)||!plan.length||plan.length>allTasks.length)throw new Error("未设置施测题目");
@@ -244,6 +246,14 @@
       var box=document.createElement("div");box.className="ideas";box.id="ideaBox";
       vals.forEach(function(v,i){box.appendChild(ideaRow(i,v))});area.appendChild(box);
       if(t.maxIdeas>t.minIdeas){var add=document.createElement("button");add.type="button";add.className="add";add.textContent="+ 再添加一个想法";add.onclick=function(){capture();var arr=state.answers[t.id]||[];if(arr.length>=t.maxIdeas){toast("本题最多填写 "+t.maxIdeas+" 条");return}arr.push("");state.answers[t.id]=arr;render();setTimeout(function(){var ins=document.querySelectorAll(".idea");ins[ins.length-1].focus()},0)};area.appendChild(add)}
+    }else if(t.type==="ice_cream"){
+      var ice=iceAnswer(t),box=document.createElement("div");box.className="ideas";box.id="ideaBox";
+      var first=document.createElement("p");first.textContent="第一步：请尽量多写出不同的办法。每格写一个想法。";area.appendChild(first);
+      ice.ideas.forEach(function(v,i){box.appendChild(ideaRow(i,v))});area.appendChild(box);
+      var addIce=document.createElement("button");addIce.type="button";addIce.className="add";addIce.textContent="+ 再添加一个想法";
+      addIce.onclick=function(){capture();var a=iceAnswer(t);if(a.ideas.length>=30){toast("本题最多填写30个想法");return}a.ideas.push("");render();setTimeout(function(){var inputs=document.querySelectorAll(".idea");inputs[inputs.length-1].focus()},0)};area.appendChild(addIce);
+      var details=document.createElement("div");details.className="meta-grid";details.innerHTML='<label class="meta-question"><span class="mini-label">第二步：请选择一个想法</span><select id="iceChoice" aria-label="选择想法"><option value="">请选择</option>'+ice.ideas.map(function(v,i){return '<option value="'+i+'"'+(ice.selectedIndex===i?' selected':'')+'>第'+(i+1)+'个想法</option>'}).join("")+'</select></label><label class="meta-question"><span class="mini-label">请把你选中的想法写成具体方案：需要什么？怎样做？</span><textarea class="answer" id="icePlan" placeholder="请写出你的方案……">'+esc(ice.plan)+'</textarea></label><label class="meta-question"><span class="mini-label">第三步：如果不能使用电和电池，你会怎样调整方案？</span><textarea class="answer" id="iceAdaptation" placeholder="请写出你的想法……">'+esc(ice.adaptation)+'</textarea></label><label class="meta-question"><span class="mini-label">你为什么这样调整？如果你改变了原来的想法，也可以说说改变在哪里。</span><textarea class="answer" id="iceReason" placeholder="请写出你的理由……">'+esc(ice.reason)+'</textarea></label>';area.appendChild(details);
+      Array.prototype.forEach.call(details.querySelectorAll("textarea,select"),function(input){input.addEventListener("input",debouncedSave);input.addEventListener("change",debouncedSave)});
     }else if(t.type==="claw"){
       renderClaw(area,t);
     }else if(t.type==="ticket"){
@@ -255,6 +265,13 @@
     el("next").classList.toggle("hidden",staged);
     el("next").textContent=state.current===tasks.length-1?"完成并检查":"保存并下一题";updateCountdown();save();
   }
+  function iceAnswer(t){
+    var a=state.answers[t.id];if(!a||typeof a!=="object"||Array.isArray(a))a={};
+    a.ideas=Array.isArray(a.ideas)?a.ideas:["","",""];while(a.ideas.length<3)a.ideas.push("");
+    a.selectedIndex=Number.isInteger(a.selectedIndex)&&a.selectedIndex>=0&&a.selectedIndex<a.ideas.length?a.selectedIndex:null;
+    a.plan=typeof a.plan==="string"?a.plan:"";a.adaptation=typeof a.adaptation==="string"?a.adaptation:"";a.reason=typeof a.reason==="string"?a.reason:"";state.answers[t.id]=a;return a;
+  }
+  function iceText(a){a=a||{};return ["构想：",(a.ideas||[]).map(function(x,i){return String(x||"").trim()?"想法"+(i+1)+"："+String(x).trim():""}).filter(Boolean).join("\n"),"选中想法："+(Number.isInteger(a.selectedIndex)?"第"+(a.selectedIndex+1)+"个："+((a.ideas||[])[a.selectedIndex]||""):"未选择"),"具体方案："+(a.plan||""),"无电条件下的调整："+(a.adaptation||""),"调整理由："+(a.reason||"")].join("\n");}
   function collaborationAnswer(t){
     var a=state.answers[t.id];
     if(!a||typeof a!=="object"||Array.isArray(a))a={};
@@ -544,6 +561,11 @@
     var t=tasks[state.current];
     if(t.type==="text"){var a=el("singleAnswer");if(a)state.answers[t.id]=a.value.trim()}
     else if(t.type==="ideas"){state.answers[t.id]=Array.prototype.map.call(document.querySelectorAll(".idea"),function(x){return x.value.trim()})}
+    else if(t.type==="ice_cream"){
+      var ice=iceAnswer(t);ice.ideas=Array.prototype.map.call(document.querySelectorAll(".idea"),function(x){return x.value.trim()});
+      var choice=el("iceChoice");if(choice){var value=choice.value;ice.selectedIndex=value!==""&&Number.isInteger(Number(value))?Number(value):null}
+      if(el("icePlan"))ice.plan=el("icePlan").value.trim();if(el("iceAdaptation"))ice.adaptation=el("iceAdaptation").value.trim();if(el("iceReason"))ice.reason=el("iceReason").value.trim();
+    }
     else if(t.type==="claw"){
       state.answers[t.id]=clawAnswer(t);
     }
@@ -566,6 +588,9 @@
   function go(){
     if(PREVIEW)return;
     capture();var t=tasks[state.current];
+    if(t.type==="ice_cream"){
+      var ice=iceAnswer(t);if(!Number.isInteger(ice.selectedIndex)||!String(ice.ideas[ice.selectedIndex]||"").trim()||!ice.plan.trim()){toast("请先写出想法、选择一个想法并填写方案");save();return}
+    }
     if(t.type==="ticket"){
       var ta=ticketAnswer(t);if(ta.submissions.length<3){toast("请先完成并保存三个车票任务");save();return}if(!ta.self.confidence||!ta.self.strategies.length||!ta.self.reflection.trim()){toast("请完成车票任务的自我评价和简短反思");save();return}
     }
@@ -575,7 +600,7 @@
     }
     save();if(state.current===tasks.length-1){finish();return}state.current+=1;render()
   }
-  function hasResponse(t,a){if(t.type==="collaboration"&&state.condition==="initial_only")return !!(a&&a.initialSnapshot&&a.initialSnapshot.selectedIdea);if(t.type==="collaboration")return !!(a&&a.finalAnswer&&a.finalAnswer.trim()&&a.meta&&a.meta.quality&&a.meta.confidence&&a.meta.effort&&a.meta.difficulty&&a.meta.strategies&&a.meta.strategies.length&&a.meta.strength&&a.meta.gap);if(t.type==="ticket")return !!(a&&a.submissions&&a.submissions.length>=3&&a.self&&a.self.confidence&&a.self.strategies&&a.self.strategies.length&&a.self.reflection&&a.self.reflection.trim());if(t.type==="claw")return !!(a&&a.program&&a.program.length&&a.runs&&a.runs.length);return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}
+  function hasResponse(t,a){if(t.type==="ice_cream")return !!(a&&(Array.isArray(a.ideas)&&a.ideas.some(function(v){return String(v||"").trim()})||String(a.plan||"").trim()||String(a.adaptation||"").trim()||String(a.reason||"").trim()));if(t.type==="collaboration"&&state.condition==="initial_only")return !!(a&&a.initialSnapshot&&a.initialSnapshot.selectedIdea);if(t.type==="collaboration")return !!(a&&a.finalAnswer&&a.finalAnswer.trim()&&a.meta&&a.meta.quality&&a.meta.confidence&&a.meta.effort&&a.meta.difficulty&&a.meta.strategies&&a.meta.strategies.length&&a.meta.strength&&a.meta.gap);if(t.type==="ticket")return !!(a&&a.submissions&&a.submissions.length>=3&&a.self&&a.self.confidence&&a.self.strategies&&a.self.strategies.length&&a.self.reflection&&a.self.reflection.trim());if(t.type==="claw")return !!(a&&a.program&&a.program.length&&a.runs&&a.runs.length);return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}
   function meaningfulLength(value){
     return String(value||"").replace(/[\s\p{P}\p{S}]/gu,"").length;
   }
@@ -603,6 +628,8 @@
           var userTurns=(a.chat||[]).filter(function(m){return m.role==="user"}).length;
           if(userTurns<1)add(t.id,"concern","limited_ai_engagement");
         }
+      }else if(t.type==="ice_cream"){
+        a=a||{};texts=(a.ideas||[]).concat([a.plan||"",a.adaptation||"",a.reason||""]);if(!hasResponse(t,a)){blank+=1;add(t.id,"strong","missing_response");return}
       }else if(t.type==="ticket"){
         a=a||{};texts=[];if(!a.submissions||a.submissions.length<3){blank+=1;add(t.id,"strong","missing_ticket_round");return}if(!a.self||!a.self.confidence||!a.self.strategies||!a.self.strategies.length||meaningfulLength(a.self.reflection)<5)add(t.id,"concern","missing_ticket_self_evaluation");
       }else if(t.type==="claw"){
@@ -632,6 +659,7 @@
     return {version:"effort_screen_v1",needs_second_round:needs,automatic_screen:needs!==null,strong_signal_count:strong,concern_count:concerns,blank_task_count:blank,invalid_text_task_count:invalid,recorded_task_seconds:recorded,reason_codes:checks.map(function(x){return x.code}),task_checks:checks,assessed_at:new Date().toISOString()};
   }
   function answerText(t,a){
+    if(t.type==="ice_cream")return iceText(a);
     if(t.type==="ticket"){
       a=a||{};return (a.submissions||[]).map(function(x){return "第"+x.round+"轮："+x.summary}).concat(["查看票价说明："+(a.helpViews||0)+"次","自评把握程度："+((a.self&&a.self.confidence)||"未填写"),"自报策略："+(((a.self&&a.self.strategies)||[]).join("、")||"未填写"),"反思："+((a.self&&a.self.reflection)||"未填写")]).join("\n");
     }
@@ -668,6 +696,8 @@
           o[t.id+"_analysis_outcome_source"]=state.condition==="initial_only"?"independent_only":"final_answer";
         }
         o[t.id+"_response"]=a.finalAnswer||"";o[t.id+"_final_status"]=state.condition==="initial_only"?"not_applicable":(a.finalAnswer?"answered":"missing");o[t.id+"_initial_ideas_json"]=JSON.stringify(a.initialIdeas||[]);o[t.id+"_offload_self_report_json"]=JSON.stringify(isAiCondition(state.condition)?(a.offload||null):null);o[t.id+"_initial_ideas"]=(a.initialIdeas||[]).filter(Boolean).join(" | ");o[t.id+"_selected_idea"]=a.selectedIdea||"";o[t.id+"_condition"]=state.condition;o[t.id+"_reflection_weakness"]=(a.reflection&&a.reflection.weakness)||"";o[t.id+"_reflection_improvement"]=(a.reflection&&a.reflection.improvement)||"";o[t.id+"_chat_json"]=JSON.stringify(a.chat||[]);o[t.id+"_ai_decisions_json"]=JSON.stringify(decisions);o[t.id+"_ai_decision_count"]=0;o[t.id+"_ai_decision_complete_count"]=0;o[t.id+"_final_answer_history_json"]=JSON.stringify(a.finalAnswerHistory||[]);o[t.id+"_final_answer_events_json"]=JSON.stringify(a.finalAnswerEvents||[]);o[t.id+"_final_answer_version_count"]=(a.finalAnswerHistory||[]).length;o[t.id+"_ai_error"]=a.aiError||"";o[t.id+"_phase"]=a.phase||1;o[t.id+"_initial_snapshot_json"]=JSON.stringify(a.initialSnapshot||null);o[t.id+"_phase_events_json"]=JSON.stringify(a.phaseEvents||[]);o[t.id+"_phase_seconds_json"]=JSON.stringify(a.phaseSeconds||{});o[t.id+"_treatment_completed_at"]=a.treatmentCompletedAt||"";o[t.id+"_final_locked_at"]=a.finalLockedAt||"";o[t.id+"_treatment_skipped"]=a.treatmentSkipped===true;o[t.id+"_meta_skipped"]=a.metaSkipped===true;o[t.id+"_meta_quality"]=(a.meta&&a.meta.quality)||"";o[t.id+"_meta_confidence"]=(a.meta&&a.meta.confidence)||"";o[t.id+"_meta_effort"]=(a.meta&&a.meta.effort)||"";o[t.id+"_meta_difficulty"]=(a.meta&&a.meta.difficulty)||"";o[t.id+"_meta_strategies_json"]=JSON.stringify((a.meta&&a.meta.strategies)||[]);o[t.id+"_meta_strength"]=(a.meta&&a.meta.strength)||"";o[t.id+"_meta_gap"]=(a.meta&&a.meta.gap)||"";
+      }else if(t.type==="ice_cream"){
+        a=a||{};o[t.id+"_response"]=hasResponse(t,a)?iceText(a):"";o[t.id+"_ideas_json"]=JSON.stringify(a.ideas||[]);o[t.id+"_selected_index"]=Number.isInteger(a.selectedIndex)?a.selectedIndex+1:"";o[t.id+"_selected_idea"]=Number.isInteger(a.selectedIndex)?(a.ideas||[])[a.selectedIndex]||"":"";o[t.id+"_plan"]=a.plan||"";o[t.id+"_adaptation"]=a.adaptation||"";o[t.id+"_reason"]=a.reason||"";
       }else if(t.type==="ticket"){
         a=a||{};var r1=(a.submissions||[])[0]||{},r2=(a.submissions||[])[1]||{},r3=(a.submissions||[])[2]||{};
         o[t.id+"_response"]=JSON.stringify(a.submissions||[]);o[t.id+"_round1_json"]=JSON.stringify(r1);o[t.id+"_round2_json"]=JSON.stringify(r2);o[t.id+"_round3_json"]=JSON.stringify(r3);o[t.id+"_round1_cost"]=r1.cost==null?"":r1.cost;o[t.id+"_round2_cost"]=r2.cost==null?"":r2.cost;o[t.id+"_round3_cost"]=r3.cost==null?"":r3.cost;o[t.id+"_round1_correct"]=r1.correct==null?"":r1.correct;o[t.id+"_round2_correct"]=r2.correct==null?"":r2.correct;o[t.id+"_round3_correct"]=r3.correct==null?"":r3.correct;o[t.id+"_round2_compared"]=!!r2.compared_target_options;o[t.id+"_unavailable_views"]=a.unavailableViews||0;o[t.id+"_unavailable_attempts"]=a.unavailableAttempts||0;o[t.id+"_adapted_after_unavailable"]=!!r3.adapted_after_unavailable;o[t.id+"_round1_valid"]=r1.correct==null?"":r1.correct;o[t.id+"_round2_valid"]=r2.correct==null?"":r2.correct;o[t.id+"_round1_optimal"]=r1.correct==null?"":r1.correct;o[t.id+"_round2_optimal"]=r2.correct==null?"":r2.correct;o[t.id+"_adapted_optimal"]=!!r3.adapted_after_unavailable;o[t.id+"_explored_json"]=JSON.stringify(a.explored||{});o[t.id+"_help_views"]=a.helpViews||0;o[t.id+"_confidence"]=(a.self&&a.self.confidence)||"";o[t.id+"_strategies_json"]=JSON.stringify((a.self&&a.self.strategies)||[]);o[t.id+"_reflection"]=(a.self&&a.self.reflection)||"";o[t.id+"_events_json"]=JSON.stringify(a.events||[]);o[t.id+"_event_count"]=(a.events||[]).length;

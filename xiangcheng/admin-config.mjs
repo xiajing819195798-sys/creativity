@@ -4,6 +4,7 @@ export const QUESTION_OPTIONS = [
   {id:'anchor_2983',name:'数字故事：2983',minutes:6},
   {id:'aut_cup',name:'纸杯的新用途',minutes:3},
   {id:'human_ai_bunny',name:'改进毛绒兔玩具',minutes:20},
+  {id:'ice_cream_melting',name:'冰淇淋融化了怎么办？',minutes:10},
 ];
 
 export function validateSelection(grades, tasks) {

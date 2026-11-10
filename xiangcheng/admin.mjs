@@ -11,7 +11,7 @@ GRADE_NAMES.forEach((name,i)=>{
 QUESTION_OPTIONS.forEach(q=>{
   const row=document.createElement('div');row.className='question';
   const label=document.createElement('label');label.className='question-name';
-  const input=document.createElement('input');input.type='checkbox';input.checked=true;input.name='question';input.value=q.id;
+  const input=document.createElement('input');input.type='checkbox';input.checked=q.id!=='ice_cream_melting';input.name='question';input.value=q.id;
   const position=document.createElement('span');position.className='question-position';
   const text=document.createElement('span');text.textContent=q.name;label.append(input,position,text);
   const minutes=document.createElement('label');minutes.className='minutes';minutes.append(document.createTextNode('倒计时'));
