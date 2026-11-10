@@ -40,13 +40,12 @@ function syncPreview(){
   for(const t of tasks){
     const q=QUESTION_OPTIONS.find(x=>x.id===t.id);
     if(t.id==='human_ai_bunny'){
-      options.push({id:t.id,phase:1,condition:'ai',label:q.name+' · 初稿'},
-        {id:t.id,phase:2,condition:'ai',label:q.name+' · AI 对话'},
-        {id:t.id,phase:2,condition:'reflection',label:q.name+' · 引导反思'},
-        {id:t.id,phase:3,condition:'ai',label:q.name+' · AI / 反思组终稿'},
-        {id:t.id,phase:3,condition:'control',label:q.name+' · 控制组终稿'},
-        {id:t.id,phase:4,condition:'ai',label:q.name+' · 自我评价'});
-    } else options.push({id:t.id,phase:1,condition:'ai',label:q.name});
+      options.push({id:t.id,phase:1,condition:'initial_only',label:q.name+' · 初稿组三组共同初稿'},
+        {id:t.id,phase:2,condition:'ai_socratic',label:q.name+' · 苏格拉底组对话'},
+        {id:t.id,phase:2,condition:'ai_feedback',label:q.name+' · 反馈组对话'},
+        {id:t.id,phase:3,condition:'ai_feedback',label:q.name+' · AI 组终稿'},
+        {id:t.id,phase:4,condition:'ai_feedback',label:q.name+' · 自我评价'});
+    } else options.push({id:t.id,phase:1,condition:'initial_only',label:q.name});
   }
   previewSelect.replaceChildren();
   for(const o of options){const option=document.createElement('option');option.value=`${o.id}|${o.phase}|${o.condition}`;option.textContent=o.label;previewSelect.append(option);}

@@ -108,23 +108,26 @@
   var GRADE_CONFIG_KEY="xiangcheng_202611";
   var SCHOOL_ID="suzhou_xiangcheng_primary";
   var SCHOOL_NAME="苏州相城小学";
-  var INSTRUMENT_VERSION="creativity_assessment_xiangcheng_202611_v1";
+  var LEGACY_INSTRUMENT_VERSION="creativity_assessment_xiangcheng_202611_v1";
+  var INSTRUMENT_VERSION="creativity_assessment_xiangcheng_three_arm_v2";
   var GRADE_NAMES=["", "一年级", "二年级", "三年级", "四年级", "五年级", "六年级", "初一", "初二", "初三", "高一", "高二", "高三"];
   var gradeConfig=null;
   var AI_MODEL_GROUP="cloudbase";
   var AI_MODEL_NAME="hy4-preview";
   var AI_PROMPT_VERSION="bunny_feedback_v2_xiangcheng_grade_202611";
+  var PROMPT_VERSIONS={ai_socratic:"bunny_socratic_v1_20261110",ai_feedback:"bunny_feedback_v3_20261110"};
   // ===== 题目文案编辑区：每题的 title、tag、mins、prompt 和 hint 都可在这里修改。 =====
   var tasks=[
     {id:"anchor_illustration_titles",title:"插图标题",tag:"锚题 · 产生多样想法",mins:5,type:"ideas",minIdeas:3,maxIdeas:3,prompt:"请为上面这幅插图设计出三个彼此明显不同的标题。",hint:"标题可以关注不同事物，也可以用不同角度或表达方式理解这幅图。",figure:'<div class="stimulus"><svg viewBox="0 0 640 340" role="img" aria-label="一本巨大的书位于自然环境中"><defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dff5ef"/><stop offset="1" stop-color="#fff7dc"/></linearGradient></defs><rect width="640" height="340" rx="22" fill="url(#sky)"/><circle cx="532" cy="70" r="34" fill="#f2b84b" opacity=".8"/><path d="M0 238 Q130 178 265 236 T640 224 V340 H0Z" fill="#91c7a7"/><path d="M0 272 Q145 220 300 280 T640 265 V340 H0Z" fill="#4f9d88"/><path d="M145 250 Q235 188 320 246 Q407 188 500 250 L475 304 Q397 274 320 311 Q242 274 166 304Z" fill="#fffdf7" stroke="#126e68" stroke-width="7"/><path d="M320 246 V311" stroke="#126e68" stroke-width="5"/><path d="M314 235 C296 188 301 142 326 101 C351 143 357 188 326 237Z" fill="#58a99f"/><path d="M326 161 C283 150 260 124 251 90 C291 92 319 113 326 161Z" fill="#7ec3a6"/><path d="M326 179 C370 164 398 136 409 99 C367 102 338 128 326 179Z" fill="#6db58f"/><g fill="#fff"><circle cx="88" cy="82" r="20"/><circle cx="111" cy="73" r="27"/><circle cx="139" cy="84" r="20"/></g></svg></div>'},
     {id:"anchor_2983",title:"数字故事：2983",tag:"锚题 · 产生创造性想法",mins:6,type:"text",prompt:"学校将举办一次创意故事展。请根据数字“2983”想出一个有趣而不同寻常的故事构想。用几句话说明故事发生了什么，并让数字2983成为故事中的重要内容。",hint:"尽量写得清楚、完整，并让想法与常见答案有所不同。"},
-    {id:"aut_cup",title:"纸杯的新用途",tag:"AUT · 发散思维",mins:3,type:"ideas",minIdeas:4,maxIdeas:20,prompt:"纸杯除了用来喝水，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。不要只换一种饮料；用途越多样越好。"},
-    {id:"human_ai_bunny",title:"改进毛绒兔玩具",tag:"随机任务 · 人机创造",mins:20,type:"collaboration",prompt:"请提出一个最佳改进方案，使普通的毛绒兔玩具更加有趣、有创意，同时适合儿童安全地使用。",hint:"先写出自己的想法；随后系统会随机分配完成方式，最后形成完整方案。"}
+    {id:"aut_cup",title:"纸杯的新用途",tag:"AUT · 发散思维",mins:3,type:"ideas",minIdeas:1,maxIdeas:200,prompt:"纸杯除了用来喝水，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。不要只换一种饮料；用途越多样越好。"},
+    {id:"human_ai_bunny",title:"改进毛绒兔玩具",tag:"随机任务 · 人机创造",mins:20,type:"collaboration",prompt:"请提出一个最佳改进方案，使普通的毛绒兔玩具更加有趣、有创意，同时适合儿童安全地使用。",hint:"先写出自己的想法；随后系统会随机分配完成方式。"},
+    {id:"aut_box_transfer",title:"纸盒的新用途",tag:"独立迁移 · 发散思维",mins:3,type:"ideas",minIdeas:1,maxIdeas:200,prompt:"纸盒除了用来装东西，还能有哪些不同寻常但可行的用途？请尽量多写。",hint:"每一格写一种用途。请独立完成，不使用 AI。"}
   ];
   // ===== 题目图片编辑区：图片文件放在 assets/images/，修改 src 即可更换。 =====
-  tasks[0].figure='<div class="stimulus"><img src="assets/images/comic-title.png" alt="漫画标题题目图片：灯泡中的地球"></div>';
-  tasks[1].figure='<div class="stimulus"><img src="assets/images/story-2983.png" alt="数字故事2983题目图片：封面写有2983的橙色书本"></div>';
-  tasks[3].figure='<div class="stimulus"><img src="assets/images/plush-rabbit.webp" alt="一只普通的浅米色毛绒兔玩具"></div>';
+  tasks[0].figure='<div class="stimulus"><img src="../assets/images/comic-title.png" alt="漫画标题题目图片：灯泡中的地球"></div>';
+  tasks[1].figure='<div class="stimulus"><img src="../assets/images/story-2983.png" alt="数字故事2983题目图片：封面写有2983的橙色书本"></div>';
+  tasks[3].figure='<div class="stimulus"><img src="../assets/images/plush-rabbit.webp" alt="一只普通的浅米色毛绒兔玩具"></div>';
   var allTasks=tasks.slice();
   function applyTaskPlan(plan){
     if(!Array.isArray(plan)||!plan.length||plan.length>allTasks.length)throw new Error("未设置施测题目");
@@ -151,7 +154,15 @@
     return{condition:condition,method:"grade_stratified_weighted_quad_v2",stratum_grade:String(grade||""),block_id:String(block),block_slot:slot,permutation:permutation,pair_id:String(block),pair_slot:slot,orientation:permutation,ordinal_source:source};
   }
   function assignCondition(studentId,grade){return assignmentInfo(studentId,grade).condition}
-  function conditionLabel(c){return c==="ai"?"AI对话":(c==="reflection"?"提示反思":"独立完成")}
+  function newAssignment(grade){
+    var values=new Uint32Array(1),limit=4294967295;
+    do{window.crypto.getRandomValues(values)}while(values[0]>=limit);
+    var groups=["initial_only","ai_socratic","ai_feedback"];
+    return {condition:groups[values[0]%3],method:"browser_simple_random_three_arm_v1",stratum_grade:String(grade||""),assigned_at:new Date().toISOString()};
+  }
+  function isAiCondition(c){return c==="ai"||c==="ai_socratic"||c==="ai_feedback"}
+  function promptVersion(c){return PROMPT_VERSIONS[c]||(c==="ai"?AI_PROMPT_VERSION:"")}
+  function conditionLabel(c){return ({initial_only:"初稿组",ai_socratic:"苏格拉底组",ai_feedback:"反馈组",ai:"AI对话",reflection:"提示反思",control:"独立完成"})[c]||"未记录"}
   function uniqCount(a){var seen={};return (a||[]).filter(function(x){var k=String(x).trim().toLowerCase();if(!k||seen[k])return false;seen[k]=1;return true}).length}
   function secondsTotal(){return Math.max(0,Math.round((Date.now()-new Date(state.startedAt).getTime())/1000))}
   function fmt(n){n=Math.max(0,n||0);return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
@@ -165,7 +176,13 @@
   function autoAdvance(){
     if(PREVIEW)return;
     if(advancing)return;advancing=true;capture();
-    var t=tasks[state.current];state.taskSeconds[t.id]=t.mins*60;save();
+    var t=tasks[state.current];state.taskSeconds[t.id]=t.mins*60;
+    if(t.type==="collaboration"){
+      var a=collaborationAnswer(t);
+      if(a.phase===1&&!a.initialSnapshot&&a.selectedIdea.trim())a.initialSnapshot={initialIdeas:a.initialIdeas.slice(),selectedIdea:a.selectedIdea,lockedAt:new Date().toISOString(),source:"timeout"};
+      if(state.condition==="initial_only")a.finalStatus="not_applicable";
+    }
+    save();
     if(state.current===tasks.length-1){advancing=false;finish();return}
     state.current+=1;advancing=false;toast("本题时间到，已自动进入下一题");render();
   }
@@ -176,7 +193,7 @@
     if(!gradeConfig||gradeConfig.allowed_grades.indexOf(Number(grade))<0){toast("请选择本次开放的年级");return}
     if(!sid||!grade||!cc){toast("请填写编号、年级和班级代码");return}
     if(!el("consent").checked){toast("请先阅读并勾选说明");return}
-    var assignment=assignmentInfo(sid,grade);state={meta:{studentId:sid,grade:grade,classCode:cc,gradeConfigVersion:gradeConfig.version,assessmentTasks:gradeConfig.assessment_tasks},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,condition:assignment.condition,assignment:assignment,startedAt:new Date().toISOString(),submittedAt:null};
+    var assignment=newAssignment(grade);state={meta:{studentId:sid,grade:grade,classCode:cc,instrumentVersion:INSTRUMENT_VERSION,gradeConfigVersion:gradeConfig.version,assessmentTasks:gradeConfig.assessment_tasks},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:0,condition:assignment.condition,assignment:assignment,startedAt:new Date().toISOString(),submittedAt:null};
     save();show("test");render();startTimer();
   }
   function render(){
@@ -216,6 +233,7 @@
     a.phase=Math.max(1,Math.min(4,Number(a.phase)||1));a.phaseEvents=Array.isArray(a.phaseEvents)?a.phaseEvents:[];a.phaseSeconds=a.phaseSeconds||{};
     a.phaseStartElapsed=Number.isFinite(Number(a.phaseStartElapsed))?Number(a.phaseStartElapsed):(state.taskSeconds[t.id]||0);
     a.initialSnapshot=a.initialSnapshot||null;a.treatmentCompletedAt=a.treatmentCompletedAt||null;a.finalLockedAt=a.finalLockedAt||null;a.metaSkipped=a.metaSkipped===true;
+    a.offload=a.offload||{requested:[],usage:[],independentConfidence:""};
     a.meta=a.meta||{quality:"",confidence:"",effort:"",difficulty:"",strategies:[],strength:"",gap:""};a.meta.strategies=Array.isArray(a.meta.strategies)?a.meta.strategies:[];
     ["quality","confidence","effort","difficulty","strength","gap"].forEach(function(k){a.meta[k]=a.meta[k]||""});
     state.answers[t.id]=a;return a;
@@ -308,8 +326,9 @@
     clearTimeout(finalVersionTimer);finalVersionTimer=setTimeout(function(){addFinalAnswerVersion(a,a.finalAnswer,"pause");save()},800);save();
   }
   function renderCollaboration(area,t){
-    var a=collaborationAnswer(t),isAi=state.condition==="ai",isReflection=state.condition==="reflection";
-    var phaseNames=state.condition==="control"?[{phase:1,label:"独立构思"},{phase:3,label:"最终方案"},{phase:4,label:"自我评价"}]:[{phase:1,label:"独立构思"},{phase:2,label:"分组活动"},{phase:3,label:"最终方案"},{phase:4,label:"自我评价"}],phaseLine='<div class="phase-line">'+phaseNames.map(function(x,i){var cls=x.phase===a.phase?" active":(x.phase<a.phase?" done":"");return '<span class="phase-dot'+cls+'">'+(i+1)+'. '+x.label+'</span>'}).join("")+'</div>';
+    var a=collaborationAnswer(t),isAi=isAiCondition(state.condition),isReflection=state.condition==="reflection";
+    function scale(name,value,labels){return '<div class="ticket-radio">'+labels.map(function(label,i){var v=String(i+1);return '<label><input type="radio" name="'+name+'" value="'+v+'"'+(value===v?' checked':'')+'> '+label+'</label>'}).join("")+'</div>'}
+    var phaseNames=state.condition==="initial_only"?[{phase:1,label:"独立构思"}]:state.condition==="control"?[{phase:1,label:"独立构思"},{phase:3,label:"最终方案"},{phase:4,label:"自我评价"}]:[{phase:1,label:"独立构思"},{phase:2,label:"分组活动"},{phase:3,label:"最终方案"},{phase:4,label:"自我评价"}],phaseLine='<div class="phase-line">'+phaseNames.map(function(x,i){var cls=x.phase===a.phase?" active":(x.phase<a.phase?" done":"");return '<span class="phase-dot'+cls+'">'+(i+1)+'. '+x.label+'</span>'}).join("")+'</div>';
     var body="";
     if(a.phase===1){
       body='<div class="stage"><h3>第一步：独立构思</h3><p>请先独立写出两个初步想法，并选出一个最值得继续发展的想法。提交后将进入下一阶段，不能返回查看或修改本页。</p><div class="twocol"><label><span class="mini-label">初步想法1</span><textarea class="answer collabInitial" data-index="0" style="min-height:110px">'+esc(a.initialIdeas[0])+'</textarea></label><label><span class="mini-label">初步想法2</span><textarea class="answer collabInitial" data-index="1" style="min-height:110px">'+esc(a.initialIdeas[1])+'</textarea></label></div><label><span class="mini-label" style="margin-top:10px">选择一个最值得继续发展的想法</span><textarea class="answer" id="selectedIdea" style="min-height:110px">'+esc(a.selectedIdea)+'</textarea></label><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">提交初步构思，进入下一步</button></div></div>';
@@ -322,9 +341,14 @@
     }else if(a.phase===3){
       body='<div class="stage"><h3>'+(state.condition==="control"?"第二步":"第三步")+'：形成最终方案</h3><p>请用自己的语言写出最终方案，包括具体改动、使用方式，以及它为什么有趣且可行。本页不会显示初步构思或上一阶段的内容。</p><textarea class="answer finalanswer" id="finalAnswer" placeholder="请在这里写最终方案……">'+esc(a.finalAnswer)+'</textarea><div class="version-note">系统会自动保存最终方案的修改时间和版本，用于分析思考与修改过程。</div><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">提交最终方案，进入自我评价</button></div></div>';
     }else{
-      function scale(name,value,labels){return '<div class="ticket-radio">'+labels.map(function(label,i){var v=String(i+1);return '<label><input type="radio" name="'+name+'" value="'+v+'"'+(value===v?' checked':'')+'> '+label+'</label>'}).join("")+'</div>'}
       var strategies=[["checked_requirements","我检查了方案是否符合题目要求"],["compared_ideas","我比较了不同想法或做法"],["noticed_gap","我发现不足后调整了思路"],["changed_strategy","遇到困难时，我换了一种思考方法"],["sought_information","我寻找了可以使用的信息或帮助"],["little_adjustment","我基本按原来的思路完成，没有明显调整"]];
       body='<div class="stage"><h3>第四步：回顾刚才的思考过程</h3><p>请根据真实情况评价自己的完成过程。这里不会显示对错，也不会改变你已经提交的最终方案。</p><div class="meta-grid"><div class="meta-question"><span class="mini-label">你认为自己的最终方案整体质量怎么样？</span>'+scale("metaQuality",a.meta.quality,["较低","一般","较好","很好"])+'</div><div class="meta-question"><span class="mini-label">你对上面这个判断有多大把握？</span>'+scale("metaConfidence",a.meta.confidence,["没有把握","不太确定","比较有把握","非常有把握"])+'</div><div class="meta-question"><span class="mini-label">完成这道题时，你投入了多少努力？</span>'+scale("metaEffort",a.meta.effort,["很少","较少","较多","很多"])+'</div><div class="meta-question"><span class="mini-label">你觉得这道题有多难？</span>'+scale("metaDifficulty",a.meta.difficulty,["很容易","比较容易","比较难","很难"])+'</div><div class="meta-question"><span class="mini-label">完成任务时，你做了哪些事情？（可多选）</span><div class="ticket-checks">'+strategies.map(function(x){return '<label><input type="checkbox" class="metaStrategy" value="'+x[0]+'"'+(a.meta.strategies.indexOf(x[0])>=0?' checked':'')+'> '+x[1]+'</label>'}).join("")+'</div></div><label class="meta-question"><span class="mini-label">你认为最终方案最成功的地方是什么？</span><textarea class="answer" id="metaStrength" maxlength="250" style="min-height:90px">'+esc(a.meta.strength)+'</textarea></label><label class="meta-question"><span class="mini-label">如果还能继续修改，你认为最需要改进的地方是什么？</span><textarea class="answer" id="metaGap" maxlength="250" style="min-height:90px">'+esc(a.meta.gap)+'</textarea></label></div><div class="ticket-note">请按真实感受作答；系统不提供对错反馈。</div></div>';
+    }
+    if(a.phase===4 && isAi && state.condition!=="ai"){
+      var requested=[["ideas","提出想法"],["evaluate","评价或比较想法"],["explain","解释如何实现"],["wording","整理或表达文字"],["none","以上都没有或不确定"]];
+      var usage=[["adopted","直接采用过建议"],["adapted","修改或组合后采用"],["compared","比较过建议"],["rejected","没有采用某些建议"],["none","没有收到建议或不确定"]];
+      function choices(items,cls,values){return items.map(function(x){return '<label><input type="checkbox" class="'+cls+'" value="'+x[0]+'"'+(values.indexOf(x[0])>=0?' checked':'')+'> '+x[1]+'</label>'}).join("")}
+      body=body.slice(0,-6)+'<div class="meta-question"><span class="mini-label">你请 AI 帮你做过什么？（可多选，也可以不填）</span><div class="ticket-checks">'+choices(requested,"offloadRequested",a.offload.requested)+'</div></div><div class="meta-question"><span class="mini-label">你怎样处理 AI 的建议？（可多选，也可以不填）</span><div class="ticket-checks">'+choices(usage,"offloadUsage",a.offload.usage)+'</div></div><div class="meta-question"><span class="mini-label">如果没有 AI，你有多大把握独立想出类似方案？（可不填）</span>'+scale("offloadConfidence",a.offload.independentConfidence,["没有把握","不太确定","比较有把握","非常有把握"])+'</div><div class="ticket-note">这些问题只记录你的感受和做法，没有对错。</div></div>';
     }
     area.innerHTML='<div class="collab">'+phaseLine+body+'</div>';
     Array.prototype.forEach.call(area.querySelectorAll("textarea,input"),function(x){if(x.id!=="chatInput"&&x.id!=="finalAnswer")x.addEventListener("input",debouncedSave)});
@@ -335,11 +359,16 @@
   function collaborationEvent(a,type,detail){a.phaseEvents.push({at:new Date().toISOString(),elapsed_seconds:state.taskSeconds.human_ai_bunny||0,phase:a.phase,type:type,detail:detail||null})}
   function advanceCollaborationPhase(t){
     capture();var a=collaborationAnswer(t),now=state.taskSeconds[t.id]||0;
-    if(a.phase===1){if(uniqCount(a.initialIdeas)<2||!a.selectedIdea.trim()){toast("请完成两个初步想法，并选出一个继续发展");return}a.initialSnapshot={initialIdeas:a.initialIdeas.slice(),selectedIdea:a.selectedIdea,lockedAt:new Date().toISOString()}}
-    else if(a.phase===2&&state.condition==="ai"&&!(a.chat||[]).some(function(m){return m.role==="user"})){toast("请至少与AI交流一次");return}
+    if(a.phase===1){if(!a.selectedIdea.trim()||(["ai","reflection","control"].includes(state.condition)&&uniqCount(a.initialIdeas)<2)){toast("请先写出选中的初步想法");return}a.initialSnapshot={initialIdeas:a.initialIdeas.slice(),selectedIdea:a.selectedIdea,lockedAt:new Date().toISOString()}}
+    else if(a.phase===2&&isAiCondition(state.condition)&&!(a.chat||[]).some(function(m){return m.role==="user"})){toast("请至少与AI交流一次");return}
     else if(a.phase===2&&state.condition==="reflection"&&(!a.reflection.weakness.trim()||!a.reflection.improvement.trim())){toast("请完成两项独立检查");return}
     else if(a.phase===3){if(!a.finalAnswer.trim()){toast("请先完成最终方案");return}addFinalAnswerVersion(a,a.finalAnswer,"locked");a.finalLockedAt=new Date().toISOString()}
     a.phaseSeconds[String(a.phase)]=Math.max(0,now-a.phaseStartElapsed);
+    if(a.phase===1&&state.condition==="initial_only"){
+      a.initialOnlyCompleted=true;a.finalStatus="not_applicable";a.treatmentSkipped=true;
+      collaborationEvent(a,"complete_initial_only",{final_status:"not_applicable"});save();
+      if(state.current===tasks.length-1){finish();return}state.current+=1;render();return;
+    }
     if(a.phase===1&&state.condition==="control"){collaborationEvent(a,"complete_phase",{from:1,to:3,skipped_phase:2});a.phase=3;a.phaseStartElapsed=now;save();render();return}
     if(a.phase===3&&state.condition==="control"){collaborationEvent(a,"complete_phase",{from:3,to:4,treatment_skipped:true});a.treatmentSkipped=true;a.phase=4;a.phaseStartElapsed=now;save();render();return}
     collaborationEvent(a,"complete_phase",{from:a.phase,to:a.phase+1});if(a.phase===2)a.treatmentCompletedAt=new Date().toISOString();a.phase+=1;a.phaseStartElapsed=now;save();render();
@@ -368,15 +397,17 @@
     try{
       var model=getCloudApp().ai().createModel(AI_MODEL_GROUP);
       var firstReply=!a.chat.some(function(m){return m.role==="assistant"});
-      var system="你是面向"+(GRADE_NAMES[Number(state.meta.grade)]||"学生")+"学生的创造性思维伙伴，任务是帮助学生完善毛绒兔玩具的改进方案。先回应学生刚说的内容，给出一个具体、简短的反馈；不要代替学生完成最终答案。学生主动提出问题时，先直接回答，不要用反问代替回答。只有学生主动请求建议或明显遇到困难时，才提供1—2个启发方向，不要求学生必须采纳。鼓励学生自行判断，并说明理由。语言友好、简短，每次不超过140个汉字，不索要或复述个人信息。"+
+      var socratic="你是面向"+(GRADE_NAMES[Number(state.meta.grade)]||"学生")+"学生的创造性思维伙伴，帮助学生改进毛绒兔。先理解并简短回应学生的具体意思，再提出至多一个简短、适龄的问题，帮助学生自主澄清想法、解释理由、比较不同可能或检查实现与安全。一次只聚焦一个方面，依据学生的回答灵活推进，不机械连续追问。学生直接提问时，先给简短明确的事实性回答；遇到明显困难时可以给一个开放提示。不要替学生生成完整最终方案，不索要个人信息，每次不超过140个汉字。";
+      var feedback="你是面向"+(GRADE_NAMES[Number(state.meta.grade)]||"学生")+"学生的创造性思维伙伴，帮助学生改进毛绒兔。先针对学生刚说的具体想法，给出简短、具体的反馈，指出一个优点、需要考虑的地方或可改进方向，并说明原因，兼顾新颖、使用和安全；学生提出问题时直接回答。把最终决定留给学生，不提供完整可直接提交的方案，不主动追问，不索要个人信息，每次不超过140个汉字。";
+      var system=state.condition==="ai_socratic"?socratic:state.condition==="ai_feedback"?feedback:"你是面向"+(GRADE_NAMES[Number(state.meta.grade)]||"学生")+"学生的创造性思维伙伴，任务是帮助学生完善毛绒兔玩具的改进方案。先回应学生刚说的内容，给出一个具体、简短的反馈；不要代替学生完成最终答案。学生主动提出问题时，先直接回答，不要用反问代替回答。只有学生主动请求建议或明显遇到困难时，才提供1—2个启发方向，不要求学生必须采纳。鼓励学生自行判断，并说明理由。语言友好、简短，每次不超过140个汉字，不索要或复述个人信息。"+
         (firstReply?"这是你第一次回复。只有确实有助于学生检查创意性、实用性或安全性时，才在反馈后提出最多一个简短、具体的问题；也可以完全不提问。":"你已经回复过学生。从本次起不要主动追问，不使用疑问句或问号。直接回答学生的问题，或就其新想法给出具体反馈。不要要求学生继续回答；适合时提醒学生可以自行结束讨论并形成最终方案。");
       var context="任务：改进普通毛绒兔玩具，使它更有趣、有创意、安全且可行。学生的初步想法：1."+a.initialIdeas[0]+"；2."+a.initialIdeas[1]+"。学生选择继续发展的想法："+a.selectedIdea;
       var messages=[{role:"system",content:system},{role:"user",content:context}].concat(a.chat.map(function(m){return{role:m.role,content:m.content}}));
       var result=await model.generateText({model:AI_MODEL_NAME,reasoning_effort:"none",messages:messages});
       var reply=result&&result.text?String(result.text).trim():"";if(!reply)throw new Error("没有收到有效回复");
       var studentAsks=/[？?]|请问|怎么|如何|为什么|能不能|可不可以|请帮|帮我|给.{0,8}建议/.test(message);
-      reply=constrainAiReply(reply,firstReply&&!studentAsks);
-      a.chat.push({role:"assistant",content:reply,at:new Date().toISOString(),model:AI_MODEL_NAME,promptVersion:AI_PROMPT_VERSION,responseId:"ai_"+Date.now().toString(36)});
+      reply=constrainAiReply(reply,state.condition==="ai_socratic"?true:(state.condition==="ai_feedback"?false:firstReply&&!studentAsks));
+      a.chat.push({role:"assistant",content:reply,at:new Date().toISOString(),model:AI_MODEL_NAME,promptVersion:promptVersion(state.condition),responseId:"ai_"+Date.now().toString(36)});
     }catch(err){console.error(err);a.aiError=String((err&&err.message)||err||"服务不可用").slice(0,180)}
     aiBusy=false;save();render();
   }
@@ -400,7 +431,7 @@
       if(el("reflectionImprovement"))c.reflection.improvement=el("reflectionImprovement").value.trim();
       if(el("finalAnswer")){c.finalAnswer=el("finalAnswer").value.trim();addFinalAnswerVersion(c,c.finalAnswer,"capture")}
       function checked(name){var x=document.querySelector('input[name="'+name+'"]:checked');return x?x.value:""}
-      if(c.phase===4){c.meta.quality=checked("metaQuality")||c.meta.quality;c.meta.confidence=checked("metaConfidence")||c.meta.confidence;c.meta.effort=checked("metaEffort")||c.meta.effort;c.meta.difficulty=checked("metaDifficulty")||c.meta.difficulty;c.meta.strategies=Array.prototype.filter.call(document.querySelectorAll(".metaStrategy"),function(x){return x.checked}).map(function(x){return x.value});if(el("metaStrength"))c.meta.strength=el("metaStrength").value.trim();if(el("metaGap"))c.meta.gap=el("metaGap").value.trim()}
+      if(c.phase===4){if(isAiCondition(state.condition)&&state.condition!=="ai"){c.offload.requested=Array.prototype.filter.call(document.querySelectorAll(".offloadRequested"),function(x){return x.checked}).map(function(x){return x.value});c.offload.usage=Array.prototype.filter.call(document.querySelectorAll(".offloadUsage"),function(x){return x.checked}).map(function(x){return x.value});c.offload.independentConfidence=checked("offloadConfidence")||c.offload.independentConfidence}c.meta.quality=checked("metaQuality")||c.meta.quality;c.meta.confidence=checked("metaConfidence")||c.meta.confidence;c.meta.effort=checked("metaEffort")||c.meta.effort;c.meta.difficulty=checked("metaDifficulty")||c.meta.difficulty;c.meta.strategies=Array.prototype.filter.call(document.querySelectorAll(".metaStrategy"),function(x){return x.checked}).map(function(x){return x.value});if(el("metaStrength"))c.meta.strength=el("metaStrength").value.trim();if(el("metaGap"))c.meta.gap=el("metaGap").value.trim()}
       c.phaseSeconds[String(c.phase)]=Math.max(0,(state.taskSeconds[t.id]||0)-c.phaseStartElapsed);
       state.answers[t.id]=c;
     }
@@ -417,7 +448,7 @@
     }
     save();if(state.current===tasks.length-1){finish();return}state.current+=1;render()
   }
-  function hasResponse(t,a){if(t.type==="collaboration")return !!(a&&a.finalAnswer&&a.finalAnswer.trim()&&a.meta&&a.meta.quality&&a.meta.confidence&&a.meta.effort&&a.meta.difficulty&&a.meta.strategies&&a.meta.strategies.length&&a.meta.strength&&a.meta.gap);if(t.type==="ticket")return !!(a&&a.submissions&&a.submissions.length>=3&&a.self&&a.self.confidence&&a.self.strategies&&a.self.strategies.length&&a.self.reflection&&a.self.reflection.trim());if(t.type==="claw")return !!(a&&a.program&&a.program.length&&a.runs&&a.runs.length);return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}
+  function hasResponse(t,a){if(t.type==="collaboration"&&state.condition==="initial_only")return !!(a&&a.initialSnapshot&&a.initialSnapshot.selectedIdea);if(t.type==="collaboration")return !!(a&&a.finalAnswer&&a.finalAnswer.trim()&&a.meta&&a.meta.quality&&a.meta.confidence&&a.meta.effort&&a.meta.difficulty&&a.meta.strategies&&a.meta.strategies.length&&a.meta.strength&&a.meta.gap);if(t.type==="ticket")return !!(a&&a.submissions&&a.submissions.length>=3&&a.self&&a.self.confidence&&a.self.strategies&&a.self.strategies.length&&a.self.reflection&&a.self.reflection.trim());if(t.type==="claw")return !!(a&&a.program&&a.program.length&&a.runs&&a.runs.length);return Array.isArray(a)?uniqCount(a)>0:String(a||"").trim().length>0}
   function meaningfulLength(value){
     return String(value||"").replace(/[\s\p{P}\p{S}]/gu,"").length;
   }
@@ -434,13 +465,14 @@
       var a=state.answers[t.id],texts=[];
       if(t.type==="collaboration"){
         a=a||{};texts=(a.initialIdeas||[]).concat([a.selectedIdea||"",a.finalAnswer||""]);
+        if(state.condition==="initial_only"){if(!String(a.selectedIdea||"").trim()){blank+=1;add(t.id,"strong","missing_initial_answer")}return}
         if(!String(a.finalAnswer||"").trim()){blank+=1;add(t.id,"strong","missing_final_answer");return}
         if(meaningfulLength(a.finalAnswer)<20)add(t.id,"strong","very_short_final_answer");
         else if(meaningfulLength(a.finalAnswer)<40)add(t.id,"concern","short_final_answer");
         if(uniqCount(a.initialIdeas)<2||meaningfulLength(a.selectedIdea)<6)add(t.id,"concern","incomplete_idea_development");
         if(state.condition==="reflection"){
           if(meaningfulLength(a.reflection&&a.reflection.weakness)<5||meaningfulLength(a.reflection&&a.reflection.improvement)<8)add(t.id,"concern","limited_reflection");
-        }else if(state.condition==="ai"){
+        }else if(isAiCondition(state.condition)){
           var userTurns=(a.chat||[]).filter(function(m){return m.role==="user"}).length;
           if(userTurns<1)add(t.id,"concern","limited_ai_engagement");
         }
@@ -460,7 +492,7 @@
         }else if(t.id==="anchor_2983"){
           if(total<15||String(a).indexOf("2983")<0)add(t.id,"strong","insufficient_story");
           else if(total<30)add(t.id,"concern","short_story");
-        }else if(t.id==="aut_cup"){
+        }else if(t.id==="aut_cup"&&state.meta.instrumentVersion!==INSTRUMENT_VERSION){
           if(uniqCount(a)<2||total<8)add(t.id,"strong","insufficient_uses");
           else if(uniqCount(a)<4)add(t.id,"concern","fewer_than_four_uses");
         }
@@ -469,7 +501,7 @@
     });
     var recorded=Object.keys(state.taskSeconds||{}).reduce(function(n,k){return n+(Number(state.taskSeconds[k])||0)},0);
     if(recorded>0&&recorded<180)add("overall","concern","very_short_total_time");
-    var needs=tasks.length===allTasks.length?(blank>=2||invalid>=2||strong>=2||(strong>=1&&concerns>=3)):null;
+    var needs=state.meta.instrumentVersion===INSTRUMENT_VERSION?null:(tasks.length===4?(blank>=2||invalid>=2||strong>=2||(strong>=1&&concerns>=3)):null);
     return {version:"effort_screen_v1",needs_second_round:needs,automatic_screen:needs!==null,strong_signal_count:strong,concern_count:concerns,blank_task_count:blank,invalid_text_task_count:invalid,recorded_task_seconds:recorded,reason_codes:checks.map(function(x){return x.code}),task_checks:checks,assessed_at:new Date().toISOString()};
   }
   function answerText(t,a){
@@ -481,26 +513,26 @@
     }
     if(t.type==="collaboration"){
       a=a||{};var lines=["随机方式："+conditionLabel(state.condition),"初步想法："+((a.initialIdeas||[]).filter(Boolean).join("；")||"（未填写）"),"选定想法："+(a.selectedIdea||"（未填写）")];
-      if(state.condition==="ai")lines.push("AI对话："+((a.chat||[]).map(function(m){return(m.role==="assistant"?"AI":"学生")+"："+m.content}).join("\n")||"（无对话）"));
+      if(isAiCondition(state.condition))lines.push("AI对话："+((a.chat||[]).map(function(m){return(m.role==="assistant"?"AI":"学生")+"："+m.content}).join("\n")||"（无对话）"));
       else if(state.condition==="reflection")lines.push("发现的不足："+((a.reflection&&a.reflection.weakness)||"（未填写）"),"改进思路："+((a.reflection&&a.reflection.improvement)||"（未填写）"));
       else lines.push("辅助过程：未提供AI或反思提示");
-      lines.push("最终方案："+(a.finalAnswer||"（未作答）"));if(state.condition==="control")lines.push("分组活动：按实验设计跳过");var m=a.meta||{};lines.push("自评方案质量："+(m.quality||"未填写"),"自评把握程度："+(m.confidence||"未填写"),"努力程度："+(m.effort||"未填写"),"困难程度："+(m.difficulty||"未填写"),"监控与调整策略："+((m.strategies||[]).join("、")||"未填写"),"认为最成功之处："+(m.strength||"未填写"),"认为仍需改进之处："+(m.gap||"未填写"));return lines.join("\n");
+      lines.push(state.condition==="initial_only"?"最终方案：不适用（初稿组按设计不作终稿）":"最终方案："+(a.finalAnswer||"（未作答）"));if(state.condition==="initial_only")return lines.join("\n");if(state.condition==="control")lines.push("分组活动：按实验设计跳过");var m=a.meta||{};lines.push("自评方案质量："+(m.quality||"未填写"),"自评把握程度："+(m.confidence||"未填写"),"努力程度："+(m.effort||"未填写"),"困难程度："+(m.difficulty||"未填写"),"监控与调整策略："+((m.strategies||[]).join("、")||"未填写"),"认为最成功之处："+(m.strength||"未填写"),"认为仍需改进之处："+(m.gap||"未填写"));return lines.join("\n");
     }
     return Array.isArray(a)?a.filter(Boolean).map(function(x,j){return(j+1)+". "+x}).join("\n"):(a||"");
   }
-  function finish(){clearInterval(timer);show("finish");var done=tasks.filter(function(t){return hasResponse(t,state.answers[t.id])}).length;state.effortCheck=assessEffort();save();var effortText=state.effortCheck.needs_second_round===null?"<br>本次题目组合未启用自动作答努力程度判定。":state.effortCheck.needs_second_round?"<br><strong>系统初步判定：本次作答需要后续进行二轮作答。</strong>":"<br>系统已完成作答努力程度检查，本次无需二轮作答。";el("summary").innerHTML="<b>"+esc(state.meta.studentId)+"</b> 已完成 "+done+" / "+tasks.length+" 题，累计用时 "+fmt(secondsTotal())+"。"+(tasks.some(function(t){return t.type==="collaboration"})?"毛绒兔题采用“"+conditionLabel(state.condition)+"”方式。":"")+"请检查后统一提交。"+effortText;
+  function finish(){clearInterval(timer);show("finish");var done=tasks.filter(function(t){return hasResponse(t,state.answers[t.id])}).length;state.effortCheck=assessEffort();save();var effortText=state.effortCheck.needs_second_round===null?"<br>本次作答不作自动努力程度判定。":state.effortCheck.needs_second_round?"<br><strong>系统初步判定：本次作答需要后续进行二轮作答。</strong>":"<br>系统已完成作答努力程度检查，本次无需二轮作答。";el("summary").innerHTML="<b>"+esc(state.meta.studentId)+"</b> 已完成 "+done+" / "+tasks.length+" 题，累计用时 "+fmt(secondsTotal())+"。"+(tasks.some(function(t){return t.type==="collaboration"})?"毛绒兔题采用“"+conditionLabel(state.condition)+"”方式。":"")+"请检查后统一提交。"+effortText;
     if(state.cloudSubmissionId){showSubmitted(state.cloudSubmissionId)}
     el("review").innerHTML=tasks.map(function(t,i){var txt=answerText(t,state.answers[t.id]);return '<div class="reviewitem"><b>'+(i+1)+". "+esc(t.title)+'</b><div>'+esc(txt||"（未作答）")+"</div></div>"}).join("");
   }
   function csvCell(x){var s=String(x==null?"":x);return '"'+s.replace(/"/g,'""')+'"'}
   function rowData(){
-    var assignment=state.assignment||assignmentInfo(state.meta.studentId,state.meta.grade),o={student_id:state.meta.studentId,grade:state.meta.grade,class_code:state.meta.classCode,condition:state.condition,assignment_method:assignment.method,assignment_stratum_grade:assignment.stratum_grade,assignment_block_id:assignment.block_id,assignment_block_slot:assignment.block_slot,assignment_permutation:assignment.permutation,assignment_pair_id:assignment.pair_id,assignment_pair_slot:assignment.pair_slot,assignment_orientation:assignment.orientation,assignment_ordinal_source:assignment.ordinal_source,started_at:state.startedAt,submitted_at:state.submittedAt,total_seconds:secondsTotal()};
-    o.school_id=SCHOOL_ID;o.school_name=SCHOOL_NAME;o.instrument_version=INSTRUMENT_VERSION;o.grade_config_version=state.meta.gradeConfigVersion;o.assessment_tasks=state.meta.assessmentTasks;
+    var assignment=state.assignment||assignmentInfo(state.meta.studentId,state.meta.grade),o={student_id:state.meta.studentId,grade:state.meta.grade,class_code:state.meta.classCode,condition:state.condition,assignment_method:assignment.method,assignment_assigned_at:assignment.assigned_at||"",assignment_stratum_grade:assignment.stratum_grade,assignment_block_id:assignment.block_id,assignment_block_slot:assignment.block_slot,assignment_permutation:assignment.permutation,assignment_pair_id:assignment.pair_id,assignment_pair_slot:assignment.pair_slot,assignment_orientation:assignment.orientation,assignment_ordinal_source:assignment.ordinal_source,started_at:state.startedAt,submitted_at:state.submittedAt,total_seconds:secondsTotal()};
+    o.school_id=SCHOOL_ID;o.school_name=SCHOOL_NAME;o.instrument_version=state.meta.instrumentVersion||LEGACY_INSTRUMENT_VERSION;o.grade_config_version=state.meta.gradeConfigVersion;o.assessment_tasks=state.meta.assessmentTasks;
     tasks.forEach(function(t){
       var a=state.answers[t.id];
       if(t.type==="collaboration"){
         a=a||{};var decisions=[];
-        o[t.id+"_response"]=a.finalAnswer||"";o[t.id+"_initial_ideas"]=(a.initialIdeas||[]).filter(Boolean).join(" | ");o[t.id+"_selected_idea"]=a.selectedIdea||"";o[t.id+"_condition"]=state.condition;o[t.id+"_reflection_weakness"]=(a.reflection&&a.reflection.weakness)||"";o[t.id+"_reflection_improvement"]=(a.reflection&&a.reflection.improvement)||"";o[t.id+"_chat_json"]=JSON.stringify(a.chat||[]);o[t.id+"_ai_decisions_json"]=JSON.stringify(decisions);o[t.id+"_ai_decision_count"]=0;o[t.id+"_ai_decision_complete_count"]=0;o[t.id+"_final_answer_history_json"]=JSON.stringify(a.finalAnswerHistory||[]);o[t.id+"_final_answer_events_json"]=JSON.stringify(a.finalAnswerEvents||[]);o[t.id+"_final_answer_version_count"]=(a.finalAnswerHistory||[]).length;o[t.id+"_ai_error"]=a.aiError||"";o[t.id+"_phase"]=a.phase||1;o[t.id+"_initial_snapshot_json"]=JSON.stringify(a.initialSnapshot||null);o[t.id+"_phase_events_json"]=JSON.stringify(a.phaseEvents||[]);o[t.id+"_phase_seconds_json"]=JSON.stringify(a.phaseSeconds||{});o[t.id+"_treatment_completed_at"]=a.treatmentCompletedAt||"";o[t.id+"_final_locked_at"]=a.finalLockedAt||"";o[t.id+"_treatment_skipped"]=a.treatmentSkipped===true;o[t.id+"_meta_skipped"]=a.metaSkipped===true;o[t.id+"_meta_quality"]=(a.meta&&a.meta.quality)||"";o[t.id+"_meta_confidence"]=(a.meta&&a.meta.confidence)||"";o[t.id+"_meta_effort"]=(a.meta&&a.meta.effort)||"";o[t.id+"_meta_difficulty"]=(a.meta&&a.meta.difficulty)||"";o[t.id+"_meta_strategies_json"]=JSON.stringify((a.meta&&a.meta.strategies)||[]);o[t.id+"_meta_strength"]=(a.meta&&a.meta.strength)||"";o[t.id+"_meta_gap"]=(a.meta&&a.meta.gap)||"";
+        o[t.id+"_response"]=a.finalAnswer||"";o[t.id+"_final_status"]=state.condition==="initial_only"?"not_applicable":(a.finalAnswer?"answered":"missing");o[t.id+"_initial_ideas_json"]=JSON.stringify(a.initialIdeas||[]);o[t.id+"_offload_self_report_json"]=JSON.stringify(isAiCondition(state.condition)?(a.offload||null):null);o[t.id+"_initial_ideas"]=(a.initialIdeas||[]).filter(Boolean).join(" | ");o[t.id+"_selected_idea"]=a.selectedIdea||"";o[t.id+"_condition"]=state.condition;o[t.id+"_reflection_weakness"]=(a.reflection&&a.reflection.weakness)||"";o[t.id+"_reflection_improvement"]=(a.reflection&&a.reflection.improvement)||"";o[t.id+"_chat_json"]=JSON.stringify(a.chat||[]);o[t.id+"_ai_decisions_json"]=JSON.stringify(decisions);o[t.id+"_ai_decision_count"]=0;o[t.id+"_ai_decision_complete_count"]=0;o[t.id+"_final_answer_history_json"]=JSON.stringify(a.finalAnswerHistory||[]);o[t.id+"_final_answer_events_json"]=JSON.stringify(a.finalAnswerEvents||[]);o[t.id+"_final_answer_version_count"]=(a.finalAnswerHistory||[]).length;o[t.id+"_ai_error"]=a.aiError||"";o[t.id+"_phase"]=a.phase||1;o[t.id+"_initial_snapshot_json"]=JSON.stringify(a.initialSnapshot||null);o[t.id+"_phase_events_json"]=JSON.stringify(a.phaseEvents||[]);o[t.id+"_phase_seconds_json"]=JSON.stringify(a.phaseSeconds||{});o[t.id+"_treatment_completed_at"]=a.treatmentCompletedAt||"";o[t.id+"_final_locked_at"]=a.finalLockedAt||"";o[t.id+"_treatment_skipped"]=a.treatmentSkipped===true;o[t.id+"_meta_skipped"]=a.metaSkipped===true;o[t.id+"_meta_quality"]=(a.meta&&a.meta.quality)||"";o[t.id+"_meta_confidence"]=(a.meta&&a.meta.confidence)||"";o[t.id+"_meta_effort"]=(a.meta&&a.meta.effort)||"";o[t.id+"_meta_difficulty"]=(a.meta&&a.meta.difficulty)||"";o[t.id+"_meta_strategies_json"]=JSON.stringify((a.meta&&a.meta.strategies)||[]);o[t.id+"_meta_strength"]=(a.meta&&a.meta.strength)||"";o[t.id+"_meta_gap"]=(a.meta&&a.meta.gap)||"";
       }else if(t.type==="ticket"){
         a=a||{};var r1=(a.submissions||[])[0]||{},r2=(a.submissions||[])[1]||{},r3=(a.submissions||[])[2]||{};
         o[t.id+"_response"]=JSON.stringify(a.submissions||[]);o[t.id+"_round1_json"]=JSON.stringify(r1);o[t.id+"_round2_json"]=JSON.stringify(r2);o[t.id+"_round3_json"]=JSON.stringify(r3);o[t.id+"_round1_cost"]=r1.cost==null?"":r1.cost;o[t.id+"_round2_cost"]=r2.cost==null?"":r2.cost;o[t.id+"_round3_cost"]=r3.cost==null?"":r3.cost;o[t.id+"_round1_correct"]=r1.correct==null?"":r1.correct;o[t.id+"_round2_correct"]=r2.correct==null?"":r2.correct;o[t.id+"_round3_correct"]=r3.correct==null?"":r3.correct;o[t.id+"_round2_compared"]=!!r2.compared_target_options;o[t.id+"_unavailable_views"]=a.unavailableViews||0;o[t.id+"_unavailable_attempts"]=a.unavailableAttempts||0;o[t.id+"_adapted_after_unavailable"]=!!r3.adapted_after_unavailable;o[t.id+"_round1_valid"]=r1.correct==null?"":r1.correct;o[t.id+"_round2_valid"]=r2.correct==null?"":r2.correct;o[t.id+"_round1_optimal"]=r1.correct==null?"":r1.correct;o[t.id+"_round2_optimal"]=r2.correct==null?"":r2.correct;o[t.id+"_adapted_optimal"]=!!r3.adapted_after_unavailable;o[t.id+"_explored_json"]=JSON.stringify(a.explored||{});o[t.id+"_help_views"]=a.helpViews||0;o[t.id+"_confidence"]=(a.self&&a.self.confidence)||"";o[t.id+"_strategies_json"]=JSON.stringify((a.self&&a.self.strategies)||[]);o[t.id+"_reflection"]=(a.self&&a.self.reflection)||"";o[t.id+"_events_json"]=JSON.stringify(a.events||[]);o[t.id+"_event_count"]=(a.events||[]).length;
@@ -508,7 +540,7 @@
         a=a||{};var last=a.lastResult||{};
         o[t.id+"_response"]=JSON.stringify({item:"P1M128",program:a.program||[],blocks:last.blocks==null?(1+clawBlockCount(a.program||[])):last.blocks,completed:!!last.completed,max_correct:last.correct||0,score:last.score||0});
         o[t.id+"_program_json"]=JSON.stringify(a.program||[]);o[t.id+"_runs_json"]=JSON.stringify(a.runs||[]);o[t.id+"_events_json"]=JSON.stringify(a.events||[]);o[t.id+"_run_count"]=(a.runs||[]).length;o[t.id+"_completed"]=!!last.completed;o[t.id+"_block_count"]=last.blocks==null?(1+clawBlockCount(a.program||[])):last.blocks;o[t.id+"_max_correct"]=last.correct||0;o[t.id+"_score"]=last.score||0;
-      }else{o[t.id+"_response"]=Array.isArray(a)?a.filter(Boolean).join(" | "):(a||"");if(t.type==="ideas")o[t.id+"_fluency_unique"]=uniqCount(a)}
+      }else{o[t.id+"_response"]=Array.isArray(a)?a.filter(Boolean).join(" | "):(a||"");if(t.type==="ideas"){o[t.id+"_ideas_json"]=JSON.stringify(Array.isArray(a)?a:[]);if(state.meta.instrumentVersion===INSTRUMENT_VERSION)o[t.id+"_raw_unique_exact"]=uniqCount(a);else o[t.id+"_fluency_unique"]=uniqCount(a)}}
       o[t.id+"_seconds"]=state.taskSeconds[t.id]||0;o[t.id+"_flexibility_human"]="";o[t.id+"_originality_human"]="";o[t.id+"_appropriateness_human"]="";
     });
     var collab=state.answers.human_ai_bunny||{},chat=Array.isArray(collab.chat)?collab.chat:[];
@@ -519,7 +551,7 @@
     o.ai_chat_json=JSON.stringify(chat);
     o.ai_message_count=chat.length;
     o.ai_user_message_count=chat.filter(function(m){return m.role==="user"}).length;
-    o.ai_prompt_version=AI_PROMPT_VERSION;
+    o.ai_prompt_version=promptVersion(state.condition);
     state.effortCheck=assessEffort();
     o.needs_second_round=state.effortCheck.needs_second_round;
     o.effort_screen_version=state.effortCheck.version;
@@ -545,7 +577,7 @@
         if(!Number.isInteger(index)||index<0||index>=tasks.length)throw new Error("预览题目无效");
         var phase=event.data.phase, condition=event.data.condition;
         if(![1,2,3,4].includes(phase))phase=1;
-        if(!["ai","reflection","control"].includes(condition))condition="ai";
+        if(!["ai","reflection","control","initial_only","ai_socratic","ai_feedback"].includes(condition))condition="initial_only";
         state={meta:{},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:index,condition:condition,startedAt:new Date().toISOString(),submittedAt:null};
         if(tasks[index].type==="collaboration")state.answers[tasks[index].id]={phase:phase};
         show("test");render();
@@ -591,7 +623,7 @@
       var app=getCloudApp();
       state.submittedAt=new Date().toISOString();
       var payload=rowData();
-      payload.instrument_version=INSTRUMENT_VERSION;
+      payload.instrument_version=state.meta.instrumentVersion||LEGACY_INSTRUMENT_VERSION;
       payload.client_submitted_at=state.submittedAt;
       payload.user_agent=navigator.userAgent.slice(0,300);
       var row={
