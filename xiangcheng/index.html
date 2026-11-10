@@ -351,6 +351,14 @@
       body=body.slice(0,-6)+'<div class="meta-question"><span class="mini-label">你请 AI 帮你做过什么？（可多选，也可以不填）</span><div class="ticket-checks">'+choices(requested,"offloadRequested",a.offload.requested)+'</div></div><div class="meta-question"><span class="mini-label">你怎样处理 AI 的建议？（可多选，也可以不填）</span><div class="ticket-checks">'+choices(usage,"offloadUsage",a.offload.usage)+'</div></div><div class="meta-question"><span class="mini-label">如果没有 AI，你有多大把握独立想出类似方案？（可不填）</span>'+scale("offloadConfidence",a.offload.independentConfidence,["没有把握","不太确定","比较有把握","非常有把握"])+'</div><div class="ticket-note">这些问题只记录你的感受和做法，没有对错。</div></div>';
     }
     area.innerHTML='<div class="collab">'+phaseLine+body+'</div>';
+    ["offloadRequested","offloadUsage"].forEach(function(cls){
+      var boxes=Array.prototype.slice.call(area.querySelectorAll("."+cls));
+      boxes.forEach(function(box){box.addEventListener("change",function(){
+        if(!box.checked)return;
+        boxes.forEach(function(other){if(other!==box&&(box.value==="none"||other.value==="none"))other.checked=false});
+        capture();save();
+      })});
+    });
     Array.prototype.forEach.call(area.querySelectorAll("textarea,input"),function(x){if(x.id!=="chatInput"&&x.id!=="finalAnswer")x.addEventListener("input",debouncedSave)});
     var finalBox=el("finalAnswer");if(finalBox){finalBox.addEventListener("input",function(e){recordFinalInput(a,e,finalBox.value)});finalBox.addEventListener("blur",function(){a.finalAnswer=finalBox.value;addFinalAnswerVersion(a,a.finalAnswer,"blur");save()})}
     if(isAi&&el("sendAi")){var send=el("sendAi");send.disabled=aiBusy;send.textContent=aiBusy?"AI思考中……":"发送";send.onclick=sendAiMessage;var cb=el("chatBox");cb.scrollTop=cb.scrollHeight}
