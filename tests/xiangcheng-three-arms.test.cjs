@@ -20,12 +20,18 @@ function harness(randomValues=[0]) {
   return context.window.testApi;
 }
 const bunny={id:'human_ai_bunny',type:'collaboration',mins:20};
+test('纸盒题不再是学生端可选任务',()=>{
+  const html=fs.readFileSync(path.join(__dirname,'../xiangcheng/index.html'),'utf8');
+  const config=fs.readFileSync(path.join(__dirname,'../xiangcheng/admin-config.mjs'),'utf8');
+  assert.doesNotMatch(html,/id:"aut_box_transfer"/);
+  assert.doesNotMatch(config,/aut_box_transfer/);
+});
 function state(condition) {return {meta:{studentId:'T1',grade:'5',classCode:'1',instrumentVersion:'creativity_assessment_xiangcheng_three_arm_v2',gradeConfigVersion:'v1',assessmentTasks:[bunny]},answers:{human_ai_bunny:{initialIdeas:['软软的兔子','会唱歌的兔子'],selectedIdea:'软软的兔子',chat:[],phase:1,phaseStartElapsed:0}},taskStarted:{},taskDeadline:{},taskSeconds:{human_ai_bunny:10},current:0,condition,startedAt:'2026-01-01T00:00:00Z'};}
 
 test('随机分配可进入三组，初稿组无伪造终稿',()=>{
   const h=harness([0,1,2]);
   assert.deepEqual([h.newAssignment(5).condition,h.newAssignment(5).condition,h.newAssignment(5).condition],['initial_only','ai_socratic','ai_feedback']);
-  h.setTasks([bunny,{id:'aut_box_transfer',type:'ideas',mins:3}]);h.setState(state('initial_only'));
+  h.setTasks([bunny,{id:'anchor_2983',type:'text',mins:3}]);h.setState(state('initial_only'));
   h.advanceCollaborationPhase(bunny);
   const s=h.getState(),a=s.answers.human_ai_bunny;
   assert.equal(s.current,1);assert.equal(a.initialSnapshot.selectedIdea,'软软的兔子');
