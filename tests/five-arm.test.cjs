@@ -45,6 +45,24 @@ test('第一轮AI组从对话构思进入最终方案，初稿明确标为AI可�
     s.answers.human_ai_bunny.finalAnswer='会讲故事的兔子';const row=h.rowData();assert.equal(row.assignment_five_arm_group,code);assert.equal(row.assignment_ai_timing,'before_draft');assert.equal(row.human_ai_bunny_initial_type,'ai_available');assert.equal(row.human_ai_bunny_analysis_outcome,'会讲故事的兔子');
   }
 });
+test('新版第一轮AI两组不设初稿，对话后填写最终方案并进入自我评价',()=>{
+  for(const code of ['early_socratic','early_feedback']){
+    const h=harness(),s=state(code);s.meta.instrumentVersion='creativity_assessment_xiangcheng_five_arm_v2';h.setTasks([bunny]);h.setState(s);
+    const area={innerHTML:'',querySelectorAll:()=>[]};h.renderCollaboration(area,bunny);assert.match(area.innerHTML,/结束讨论，进入最终方案/);assert.doesNotMatch(area.innerHTML,/我的初步方案|id="selectedIdea"/);
+    h.advanceCollaborationPhase(bunny);assert.equal(s.answers.human_ai_bunny.phase,1);
+    s.answers.human_ai_bunny.chat=[{role:'user',content:'我想让兔子讲故事'}];h.advanceCollaborationPhase(bunny);assert.equal(s.answers.human_ai_bunny.phase,3);assert.equal(s.answers.human_ai_bunny.initialSnapshot,null);
+    h.renderCollaboration(area,bunny);assert.match(area.innerHTML,/形成最终方案/);assert.doesNotMatch(area.innerHTML,/本页不会显示初步构思/);
+    s.answers.human_ai_bunny.finalAnswer='会讲故事的兔子';h.advanceCollaborationPhase(bunny);assert.equal(s.answers.human_ai_bunny.phase,4);
+    const row=h.rowData();assert.equal(row.human_ai_bunny_initial_status,'not_applicable');assert.equal(row.human_ai_bunny_initial_type,'not_applicable');assert.equal(row.human_ai_bunny_selected_idea,'');assert.equal(row.human_ai_bunny_response,'会讲故事的兔子');
+  }
+});
+test('新版独立初稿组流程保持独立构思',()=>{
+  for(const code of ['late_socratic','late_feedback','control']){
+    const h=harness(),s=state(code);s.meta.instrumentVersion='creativity_assessment_xiangcheng_five_arm_v2';s.answers.human_ai_bunny.selectedIdea='更柔软';h.setTasks([bunny,{id:'anchor_2983',type:'text',mins:3}]);h.setState(s);h.advanceCollaborationPhase(bunny);
+    assert.equal(s.answers.human_ai_bunny.initialSnapshot.initialType,'independent');assert.equal(h.rowData().human_ai_bunny_initial_status,'answered');
+    assert.equal(s.answers.human_ai_bunny.phase,code==='control'?1:2);
+  }
+});
 test('独立初稿后AI组先锁定独立初稿再对话，控制组只保留一个答案',()=>{
   for(const code of ['late_socratic','late_feedback','control']){
     const h=harness(),s=state(code);s.answers.human_ai_bunny.selectedIdea='更柔软';h.setTasks([bunny,{id:'anchor_2983',type:'text',mins:3}]);h.setState(s);h.advanceCollaborationPhase(bunny);

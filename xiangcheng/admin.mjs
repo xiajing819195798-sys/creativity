@@ -70,7 +70,8 @@ function syncPreview(){
         {id:t.id,phase:1,condition:'ai_socratic',timing:'after_draft',label:q.name+' · AI组独立初稿'},
         {id:t.id,phase:2,condition:'ai_socratic',timing:'after_draft',label:q.name+' · 独立构思后苏格拉底对话'},
         {id:t.id,phase:2,condition:'ai_feedback',timing:'after_draft',label:q.name+' · 独立构思后反馈对话'},
-        {id:t.id,phase:3,condition:'ai_feedback',label:q.name+' · AI 组终稿'},
+        {id:t.id,phase:3,condition:'ai_feedback',timing:'before_draft',label:q.name+' · 第一轮 AI 组最终方案'},
+        {id:t.id,phase:3,condition:'ai_feedback',timing:'after_draft',label:q.name+' · 初稿后 AI 组最终方案'},
         {id:t.id,phase:4,condition:'ai_feedback',label:q.name+' · 自我评价'});
     } else options.push({id:t.id,phase:1,condition:'initial_only',label:q.name});
   }

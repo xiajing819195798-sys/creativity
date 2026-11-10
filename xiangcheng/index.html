@@ -109,7 +109,7 @@
   var SCHOOL_ID="suzhou_xiangcheng_primary";
   var SCHOOL_NAME="苏州相城小学";
   var LEGACY_INSTRUMENT_VERSION="creativity_assessment_xiangcheng_202611_v1";
-  var INSTRUMENT_VERSION="creativity_assessment_xiangcheng_five_arm_v1";
+  var INSTRUMENT_VERSION="creativity_assessment_xiangcheng_five_arm_v2";
   var LEGACY_BUNNY_PROMPT="请提出一个最佳改进方案，使普通的毛绒兔玩具更加有趣、有创意，同时适合儿童安全地使用。";
   var GRADE_NAMES=["", "一年级", "二年级", "三年级", "四年级", "五年级", "六年级", "初一", "初二", "初三", "高一", "高二", "高三"];
   var gradeConfig=null;
@@ -177,8 +177,9 @@
   }
   function isAiCondition(c){return c==="ai"||c==="ai_socratic"||c==="ai_feedback"}
   function promptVersion(c){return (state.meta&&state.meta.aiPromptVersion)||PREVIOUS_PROMPT_VERSIONS[c]||(c==="ai"?AI_PROMPT_VERSION:"")}
-  function isFiveArmVersion(){return state.meta.instrumentVersion==="creativity_assessment_xiangcheng_five_arm_v1"}
+  function isFiveArmVersion(){return /^creativity_assessment_xiangcheng_five_arm_v[12]$/.test(state.meta.instrumentVersion||"")}
   function isEarlyAi(){return isFiveArmVersion()&&isAiCondition(state.condition)&&state.assignment&&state.assignment.ai_timing==="before_draft"}
+  function isEarlyNoDraft(){return state.meta.instrumentVersion==="creativity_assessment_xiangcheng_five_arm_v2"&&isEarlyAi()}
   function isThreeArmVersion(){return isFiveArmVersion()||/^creativity_assessment_xiangcheng_three_arm_v[234567]$/.test(state.meta.instrumentVersion||"")}
   function hasSingleInitialIdea(){return isFiveArmVersion()||/^creativity_assessment_xiangcheng_three_arm_v[567]$/.test(state.meta.instrumentVersion||"")}
   function hasNewBunnyPrompt(){return isFiveArmVersion()||/^creativity_assessment_xiangcheng_three_arm_v[67]$/.test(state.meta.instrumentVersion||"")}
@@ -200,7 +201,7 @@
     var t=tasks[state.current];state.taskSeconds[t.id]=t.mins*60;
     if(t.type==="collaboration"){
       var a=collaborationAnswer(t);
-      if(a.phase===1&&!a.initialSnapshot&&a.selectedIdea.trim())a.initialSnapshot={initialIdeas:a.initialIdeas.slice(),selectedIdea:a.selectedIdea,lockedAt:new Date().toISOString(),source:"timeout",...(isFiveArmVersion()?{initialType:isEarlyAi()?"ai_available":"independent"}:{})};
+      if(a.phase===1&&!isEarlyNoDraft()&&!a.initialSnapshot&&a.selectedIdea.trim())a.initialSnapshot={initialIdeas:a.initialIdeas.slice(),selectedIdea:a.selectedIdea,lockedAt:new Date().toISOString(),source:"timeout",...(isFiveArmVersion()?{initialType:isEarlyAi()?"ai_available":"independent"}:{})};
       if(state.condition==="initial_only")a.finalStatus="not_applicable";
     }
     save();
@@ -232,7 +233,7 @@
     el("stepText").textContent="第 "+(state.current+1)+" 题 / 共 "+tasks.length+" 题";
     el("bar").style.width=((state.current+1)/tasks.length*100)+"%";
     el("taskTag").textContent=t.tag;el("taskTitle").textContent=t.title;
-    el("prompt").innerHTML=(t.figure||"")+"<div>"+esc(taskPrompt(t))+"</div>";el("hint").textContent=t.type==="collaboration"&&isFiveArmVersion()?(isEarlyAi()?"可以先和AI讨论，再写出自己的初步方案。":"请根据题目写出自己的想法。 "):t.hint;el("elapsed").textContent=fmt(secondsTotal());
+    el("prompt").innerHTML=(t.figure||"")+"<div>"+esc(taskPrompt(t))+"</div>";el("hint").textContent=t.type==="collaboration"&&isFiveArmVersion()?(isEarlyNoDraft()?"可以先和AI讨论，再写出最终方案。":isEarlyAi()?"可以先和AI讨论，再写出自己的初步方案。":"请根据题目写出自己的想法。 "):t.hint;el("elapsed").textContent=fmt(secondsTotal());
     var area=el("answerArea");area.innerHTML="";
     if(t.type==="text"){
       var ta=document.createElement("textarea");ta.className="answer";ta.id="singleAnswer";ta.placeholder="请在这里输入你的回答……";ta.value=state.answers[t.id]||"";ta.addEventListener("input",debouncedSave);area.appendChild(ta);
@@ -364,7 +365,7 @@
     if(a.phase===1){
       if(early){
         var firstChat=a.chat.length?a.chat.map(function(m){return '<div class="msg '+(m.role==="assistant"?"ai":"user")+'">'+esc(m.content)+"</div>"}).join(""):'<div class="chatempty">你可以先和AI讨论怎样改进这只毛绒玩具。</div>';
-        body='<div class="stage"><h3>第一步：讨论与构思</h3><p>先围绕毛绒玩具的改造与AI交流，再写出你的初步方案。</p><div class="chatbox" id="chatBox">'+firstChat+'</div><div class="chatrow"><input id="chatInput" maxlength="500" aria-label="向AI发送消息"><button type="button" class="btn primary" id="sendAi">发送</button></div>'+(a.aiError?'<div class="aiwarn">AI暂时未能回复：'+esc(a.aiError)+'</div>':"")+'<label><span class="mini-label" style="margin-top:14px">我的初步方案</span><textarea class="answer" id="selectedIdea" style="min-height:110px" placeholder="请写出你的一个想法……">'+esc(a.selectedIdea)+'</textarea></label><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">提交初步方案，进入下一步</button></div></div>';
+        body='<div class="stage"><h3>第一步：讨论与构思</h3><p>'+(isEarlyNoDraft()?"围绕毛绒玩具的改造与AI交流，讨论结束后写出你的最终方案。":"先围绕毛绒玩具的改造与AI交流，再写出你的初步方案。")+'</p><div class="chatbox" id="chatBox">'+firstChat+'</div><div class="chatrow"><input id="chatInput" maxlength="500" aria-label="向AI发送消息"><button type="button" class="btn primary" id="sendAi">发送</button></div>'+(a.aiError?'<div class="aiwarn">AI暂时未能回复：'+esc(a.aiError)+'</div>':"")+(isEarlyNoDraft()?"":'<label><span class="mini-label" style="margin-top:14px">我的初步方案</span><textarea class="answer" id="selectedIdea" style="min-height:110px" placeholder="请写出你的一个想法……">'+esc(a.selectedIdea)+'</textarea></label>')+'<div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">'+(isEarlyNoDraft()?"结束讨论，进入最终方案":"提交初步方案，进入下一步")+'</button></div></div>';
       }else if(hasSingleInitialIdea()){
         body='<div class="stage"><h3>第一步：独立构思</h3><p>请先独立写出一个改进毛绒兔的初步方案。提交后将进入下一阶段，不能返回查看或修改本页。</p><label><span class="mini-label">我的初步方案</span><textarea class="answer" id="selectedIdea" style="min-height:110px" placeholder="请写出你的一个想法……">'+esc(a.selectedIdea)+'</textarea></label><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">提交初步构思，进入下一步</button></div></div>';
       }else{
@@ -377,7 +378,7 @@
     }else if(a.phase===2&&isReflection){
       body='<div class="stage"><span class="condition">提示反思方式</span><h3 style="margin-top:12px">第二步：独立检查</h3><p>请根据下面的问题独立检查自己的方案。本页不会显示你刚才填写的初步构思。</p><div class="reflection-grid"><label><span class="mini-label">这个想法目前最大的不足是什么？</span><textarea class="answer" id="reflectionWeakness" style="min-height:100px">'+esc(a.reflection.weakness)+'</textarea></label><label><span class="mini-label">你准备怎样修改或完善它？</span><textarea class="answer" id="reflectionImprovement" style="min-height:100px">'+esc(a.reflection.improvement)+'</textarea></label></div><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">完成检查，进入最终方案</button></div></div>';
     }else if(a.phase===3){
-      body='<div class="stage"><h3>'+(state.condition==="control"||early?"第二步":"第三步")+'：形成最终方案</h3><p>请用自己的语言写出最终方案，包括具体改动、使用方式，以及它为什么有趣且可行。本页不会显示初步构思或上一阶段的内容。</p><textarea class="answer finalanswer" id="finalAnswer" placeholder="请在这里写最终方案……">'+esc(a.finalAnswer)+'</textarea><div class="version-note">系统会自动保存最终方案的修改时间和版本，用于分析思考与修改过程。</div><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">提交最终方案，进入自我评价</button></div></div>';
+      body='<div class="stage"><h3>'+(state.condition==="control"||early?"第二步":"第三步")+'：形成最终方案</h3><p>请用自己的语言写出最终方案，包括具体改动、使用方式，以及它为什么有趣且可行。'+(isEarlyNoDraft()?"本页不会显示上一阶段的对话。":"本页不会显示初步构思或上一阶段的内容。")+'</p><textarea class="answer finalanswer" id="finalAnswer" placeholder="请在这里写最终方案……">'+esc(a.finalAnswer)+'</textarea><div class="version-note">系统会自动保存最终方案的修改时间和版本，用于分析思考与修改过程。</div><div class="btnrow"><button type="button" class="btn primary" id="collabAdvance">提交最终方案，进入自我评价</button></div></div>';
     }else{
       var strategies=[["checked_requirements","我检查了方案是否符合题目要求"],["compared_ideas","我比较了不同想法或做法"],["noticed_gap","我发现不足后调整了思路"],["changed_strategy","遇到困难时，我换了一种思考方法"],["sought_information","我寻找了可以使用的信息或帮助"],["little_adjustment","我基本按原来的思路完成，没有明显调整"]];
       body='<div class="stage"><h3>'+(early?"第三步":"第四步")+'：回顾刚才的思考过程</h3><p>请根据真实情况评价自己的完成过程。这里不会显示对错，也不会改变你已经提交的最终方案。</p><div class="meta-grid"><div class="meta-question"><span class="mini-label">你认为自己的最终方案整体质量怎么样？</span>'+scale("metaQuality",a.meta.quality,["较低","一般","较好","很好"])+'</div><div class="meta-question"><span class="mini-label">你对上面这个判断有多大把握？</span>'+scale("metaConfidence",a.meta.confidence,["没有把握","不太确定","比较有把握","非常有把握"])+'</div><div class="meta-question"><span class="mini-label">完成这道题时，你投入了多少努力？</span>'+scale("metaEffort",a.meta.effort,["很少","较少","较多","很多"])+'</div><div class="meta-question"><span class="mini-label">你觉得这道题有多难？</span>'+scale("metaDifficulty",a.meta.difficulty,["很容易","比较容易","比较难","很难"])+'</div><div class="meta-question"><span class="mini-label">完成任务时，你做了哪些事情？（可多选）</span><div class="ticket-checks">'+strategies.map(function(x){return '<label><input type="checkbox" class="metaStrategy" value="'+x[0]+'"'+(a.meta.strategies.indexOf(x[0])>=0?' checked':'')+'> '+x[1]+'</label>'}).join("")+'</div></div><label class="meta-question"><span class="mini-label">你认为最终方案最成功的地方是什么？</span><textarea class="answer" id="metaStrength" maxlength="250" style="min-height:90px">'+esc(a.meta.strength)+'</textarea></label><label class="meta-question"><span class="mini-label">如果还能继续修改，你认为最需要改进的地方是什么？</span><textarea class="answer" id="metaGap" maxlength="250" style="min-height:90px">'+esc(a.meta.gap)+'</textarea></label></div><div class="ticket-note">请按真实感受作答；系统不提供对错反馈。</div></div>';
@@ -407,7 +408,7 @@
   function advanceCollaborationPhase(t){
     capture();var a=collaborationAnswer(t),now=state.taskSeconds[t.id]||0;
     if(isFiveArmVersion()&&aiBusy&&isAiCondition(state.condition)){toast("请等待AI回复后再继续");return}
-    if(a.phase===1){if(!a.selectedIdea.trim()||(["ai","reflection","control"].includes(state.condition)&&uniqCount(a.initialIdeas)<2)){toast("请先写出选中的初步想法");return}if(isEarlyAi()&&!(a.chat||[]).some(function(m){return m.role==="user"})){toast("请先与AI交流一次");return}a.initialSnapshot={initialIdeas:a.initialIdeas.slice(),selectedIdea:a.selectedIdea,lockedAt:new Date().toISOString(),...(isFiveArmVersion()?{initialType:isEarlyAi()?"ai_available":"independent"}:{})}}
+    if(a.phase===1){if(!isEarlyNoDraft()&&(!a.selectedIdea.trim()||(["ai","reflection","control"].includes(state.condition)&&uniqCount(a.initialIdeas)<2))){toast("请先写出选中的初步想法");return}if(isEarlyAi()&&!(a.chat||[]).some(function(m){return m.role==="user"})){toast("请先与AI交流一次");return}if(!isEarlyNoDraft())a.initialSnapshot={initialIdeas:a.initialIdeas.slice(),selectedIdea:a.selectedIdea,lockedAt:new Date().toISOString(),...(isFiveArmVersion()?{initialType:isEarlyAi()?"ai_available":"independent"}:{})}}
     else if(a.phase===2&&isAiCondition(state.condition)&&!(a.chat||[]).some(function(m){return m.role==="user"})){toast("请至少与AI交流一次");return}
     else if(a.phase===2&&state.condition==="reflection"&&(!a.reflection.weakness.trim()||!a.reflection.improvement.trim())){toast("请完成两项独立检查");return}
     else if(a.phase===3){if(!a.finalAnswer.trim()){toast("请先完成最终方案");return}addFinalAnswerVersion(a,a.finalAnswer,"locked");a.finalLockedAt=new Date().toISOString()}
@@ -477,7 +478,7 @@
         (firstReply?"这是你第一次回复。只有确实有助于学生检查创意性、实用性或安全性时，才在反馈后提出最多一个简短、具体的问题；也可以完全不提问。":"你已经回复过学生。从本次起不要主动追问，不使用疑问句或问号。直接回答学生的问题，或就其新想法给出具体反馈。不要要求学生继续回答；适合时提醒学生可以自行结束讨论并形成最终方案。");
       if(isFiveArmVersion())system+="\n"+TOPIC_FOCUS_RULE;
       var taskContext=hasNewBunnyPrompt()?"任务：现在有一个普通的毛绒玩具，请提出一个改进方案，让它变得更加有趣、更有创意。":"任务：改进普通毛绒兔玩具，使它更有趣、有创意、安全且可行。";
-      var context=hasSingleInitialIdea()?taskContext+(isEarlyAi()?"学生当前尚未提交初稿，输入框中已写的想法：":"学生的初稿方案：")+a.selectedIdea:taskContext+"学生的初步想法：1."+a.initialIdeas[0]+"；2."+a.initialIdeas[1]+"。学生选择继续发展的想法："+a.selectedIdea;
+      var context=hasSingleInitialIdea()?taskContext+(isEarlyNoDraft()?"本流程没有初稿，请根据学生接下来的对话回应。":isEarlyAi()?"学生当前尚未提交初稿，输入框中已写的想法：":"学生的初稿方案：")+a.selectedIdea:taskContext+"学生的初步想法：1."+a.initialIdeas[0]+"；2."+a.initialIdeas[1]+"。学生选择继续发展的想法："+a.selectedIdea;
       var messages=[{role:"system",content:system},{role:"user",content:context}].concat(a.chat.map(function(m){return{role:m.role,content:m.content}}));
       var studentAsks=/[？?]|请问|怎么|如何|为什么|能不能|可不可以|请帮|帮我|给.{0,8}建议/.test(message);
       var guarded=(state.meta.instrumentVersion==="creativity_assessment_xiangcheng_three_arm_v7"||isFiveArmVersion())&&isAiCondition(state.condition),reply="",rejected=0;
@@ -618,7 +619,7 @@
       a=a||{};var last=a.lastResult||{};return ["题号：P1M128","代码块数："+(last.blocks==null?(1+clawBlockCount(a.program||[])):last.blocks),"运行/单步尝试次数："+((a.runs||[]).length),"达到目标状态："+(last.completed?"是":"否"),"最高正确归位数："+(last.correct==null?0:last.correct)+" / 12","PISA评分代码："+(last.score==null?0:last.score)].join("\n");
     }
     if(t.type==="collaboration"){
-      a=a||{};var lines=["随机方式："+conditionLabel(state.condition)];if(hasSingleInitialIdea())lines.push("初稿方案："+(a.selectedIdea||"（未填写）"));else lines.push("初步想法："+((a.initialIdeas||[]).filter(Boolean).join("；")||"（未填写）"),"选定想法："+(a.selectedIdea||"（未填写）"));
+      a=a||{};var lines=["随机方式："+conditionLabel(state.condition)];if(isEarlyNoDraft())lines.push("初稿方案：本组不设初稿");else if(hasSingleInitialIdea())lines.push("初稿方案："+(a.selectedIdea||"（未填写）"));else lines.push("初步想法："+((a.initialIdeas||[]).filter(Boolean).join("；")||"（未填写）"),"选定想法："+(a.selectedIdea||"（未填写）"));
       if(isAiCondition(state.condition))lines.push("AI对话："+((a.chat||[]).map(function(m){return(m.role==="assistant"?"AI":"学生")+"："+m.content}).join("\n")||"（无对话）"));
       else if(state.condition==="reflection")lines.push("发现的不足："+((a.reflection&&a.reflection.weakness)||"（未填写）"),"改进思路："+((a.reflection&&a.reflection.improvement)||"（未填写）"));
       else lines.push("辅助过程：未提供AI或反思提示");
@@ -640,7 +641,8 @@
       if(t.type==="collaboration"){
         a=a||{};var decisions=[];
         if(isFiveArmVersion()){
-          o[t.id+"_initial_type"]=isEarlyAi()?"ai_available":"independent";
+          o[t.id+"_initial_type"]=isEarlyNoDraft()?"not_applicable":isEarlyAi()?"ai_available":"independent";
+          if(state.meta.instrumentVersion==="creativity_assessment_xiangcheng_five_arm_v2")o[t.id+"_initial_status"]=isEarlyNoDraft()?"not_applicable":(a.selectedIdea?"answered":"missing");
           o[t.id+"_initial_first_input_at"]=a.initialFirstInputAt||"";
           o[t.id+"_analysis_outcome"]=state.condition==="initial_only"?(a.initialSnapshot&&a.initialSnapshot.selectedIdea||""):(a.finalAnswer||"");
           o[t.id+"_analysis_outcome_source"]=state.condition==="initial_only"?"independent_only":"final_answer";
