@@ -9,7 +9,7 @@ function harness(randomValues=[0]) {
   let script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>s.includes('function assignmentInfo'));
   assert.ok(script);
   script=script.replace('  // 教师预览复用真实题目和渲染函数', `
-    window.testApi={setState:s=>{state=s},getState:()=>state,setTasks:t=>{tasks=t},newAssignment,advanceCollaborationPhase,hasResponse,rowData,renderCollaboration,
+    window.testApi={setState:s=>{state=s},getState:()=>state,setTasks:t=>{tasks=t},newAssignment,advanceCollaborationPhase,hasResponse,rowData,renderCollaboration,taskPrompt,
       setCloud:fn=>{getCloudApp=fn},sendAiMessage,quiet:()=>{save=()=>{};render=()=>{};finish=()=>{};toast=()=>{}}};
     return;
   // 教师预览复用真实题目和渲染函数`);
@@ -60,6 +60,24 @@ test('新版 AI 上下文只包含单个初稿',async()=>{
   await h.sendAiMessage();assert.match(context,/学生的初稿方案：让兔子说故事/);assert.doesNotMatch(context,/学生的初步想法：1\./);
 });
 
+test('新题干只应用于新会话，旧版单初稿不变',()=>{
+  const prompt='现在有一个普通的毛绒玩具，请提出一个改进方案，让它变得更加有趣、更有创意。';
+  const item={...bunny,prompt};
+  for(const version of ['creativity_assessment_xiangcheng_three_arm_v5','creativity_assessment_xiangcheng_three_arm_v6']){
+    const h=harness(),s=state('ai_socratic');s.meta.instrumentVersion=version;h.setState(s);
+    const area={innerHTML:'',querySelectorAll:()=>[]};h.renderCollaboration(area,item);
+    assert.equal((area.innerHTML.match(/<textarea/g)||[]).length,1,'新旧单初稿均只有一个输入框');
+    assert.equal(h.taskPrompt(item),version.endsWith('v6')?prompt:'请提出一个最佳改进方案，使普通的毛绒兔玩具更加有趣、有创意，同时适合儿童安全地使用。');
+  }
+});
+
+test('新会话发给 AI 的任务描述与学生题干一致',async()=>{
+  const h=harness(),s=state('ai_feedback');s.meta.instrumentVersion='creativity_assessment_xiangcheng_three_arm_v6';s.meta.aiPromptVersion='bunny_feedback_v6_20261110';s.answers.human_ai_bunny.initialIdeas=['让兔子说故事'];s.answers.human_ai_bunny.selectedIdea='让兔子说故事';s.answers.human_ai_bunny.phase=2;
+  h.setTasks([bunny]);h.setState(s);let context='';
+  h.setCloud(()=>({ai:()=>({createModel:()=>({generateText:async({messages})=>{context=messages[1].content;return {text:'你设想的兔子有讲故事的功能。'}}})})}));
+  await h.sendAiMessage();assert.match(context,/任务：现在有一个普通的毛绒玩具/);assert.doesNotMatch(context,/安全且可行/);
+});
+
 test('随机分配可进入三组，初稿组无伪造终稿',()=>{
   const h=harness([0,1,0,2,1]);
   assert.deepEqual([h.newAssignment(5).condition,h.newAssignment(5).condition,h.newAssignment(5).condition],['initial_only','ai_socratic','ai_feedback']);
@@ -96,5 +114,15 @@ test('新版提示词严格匹配确认文本，旧会话保持各自版本',asy
     else assert.equal(prompt,approved[group].replace('【学生实际年级】','五年级'));
     if(group==='ai_socratic')assert.equal((chat[1].content.match(/？/g)||[]).length,1);
     else assert.doesNotMatch(chat[1].content,/？/);
+  }
+});
+
+test('不提供具体建议的候选提示词匹配待审核文本，保留版本标记',async()=>{
+  const {socratic,feedback}={"socratic": "你是面向【学生实际年级】学生的苏格拉底式创造性思维伙伴，帮助学生改进毛绒兔玩具。你的主要任务是持续追问，而不是给出评价或替学生设计。每次先理解学生刚说的内容，必要时用一句中性、简短的话回应，然后紧扣该内容提出一个具体、开放的问题；学生继续回答后，再根据新回答提出下一个问题，直到学生自行结束讨论。每轮只问一个问题，不重复已问过的问题，也不要一次列出多个问题。可以追问想法的用途、使用者、与常见玩具的不同或选择理由；每次只选一个方面，不必按固定顺序。无论学生是否主动请求，都不要提供具体改进建议、新功能、材料、步骤、备选方案或替学生做决定；不要在问题中列出可能答案或暗示具体做法。学生说不知道时，将问题换成更简单的问题。学生直接询问事实或安全问题时，可先简短说明事实或指出风险，但不要提供具体改造做法，再提出一个开放问题。尊重学生结束对话的意愿。不代写最终方案，不索要个人信息；语言友好、适合该年级，每次不超过140个汉字。", "feedback": "你是面向【学生实际年级】学生的创造性思维伙伴，帮助学生改进毛绒兔玩具。你的主要任务是对学生刚说的方案提供具体反馈，而不是持续提问或给出改进方案。每次针对学生已经明确提出的一个功能、用途、实现方式或细节，指出其特点、优点或尚不清楚的地方，并解释原因；可以涉及新颖性、使用价值、可行性、安全或细节，每次聚焦一两个方面。不编造学生未说的内容，对不确定的技术和安全情况不作肯定判断。无论学生是否主动要求，都不要给出具体改进建议、新功能、材料、操作步骤、范例或备选方案，也不要替学生选择或完成设计。学生提问时，可以针对已有内容直接回答事实或指出风险，但不能用回答提供新的具体做法。学生要求建议时，可说明“具体怎么改由你自己决定”，不以提问代替反馈。不主动追问，不代写最终方案，不索要个人信息；语言友好、适合该年级，每次不超过140个汉字。"};
+  for(const [group,version,expected] of [['ai_socratic','bunny_socratic_v4_20261110',socratic],['ai_feedback','bunny_feedback_v6_20261110',feedback]]){
+    const h=harness(),s=state(group);s.meta.instrumentVersion='creativity_assessment_xiangcheng_three_arm_v6';s.meta.aiPromptVersion=version;s.answers.human_ai_bunny.phase=2;h.setTasks([bunny]);h.setState(s);
+    let prompt='';h.setCloud(()=>({ai:()=>({createModel:()=>({generateText:async({messages})=>{prompt=messages[0].content;return {text:'这个想法需要怎样使用？'}}})})}));
+    await h.sendAiMessage();assert.equal(prompt,expected.replace('【学生实际年级】','五年级'));
+    assert.equal(h.getState().answers.human_ai_bunny.chat[1].promptVersion,version);
   }
 });
