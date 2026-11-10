@@ -64,20 +64,23 @@ function syncPreview(){
   for(const t of tasks){
     const q=QUESTION_OPTIONS.find(x=>x.id===t.id);
     if(t.id==='human_ai_bunny'){
-      options.push({id:t.id,phase:1,condition:'initial_only',label:q.name+' · 初稿组三组共同初稿'},
-        {id:t.id,phase:2,condition:'ai_socratic',label:q.name+' · 苏格拉底组对话'},
-        {id:t.id,phase:2,condition:'ai_feedback',label:q.name+' · 反馈组对话'},
+      options.push({id:t.id,phase:1,condition:'initial_only',label:q.name+' · 控制组独立构思'},
+        {id:t.id,phase:1,condition:'ai_socratic',timing:'before_draft',label:q.name+' · 第一轮苏格拉底对话'},
+        {id:t.id,phase:1,condition:'ai_feedback',timing:'before_draft',label:q.name+' · 第一轮反馈对话'},
+        {id:t.id,phase:1,condition:'ai_socratic',timing:'after_draft',label:q.name+' · AI组独立初稿'},
+        {id:t.id,phase:2,condition:'ai_socratic',timing:'after_draft',label:q.name+' · 独立构思后苏格拉底对话'},
+        {id:t.id,phase:2,condition:'ai_feedback',timing:'after_draft',label:q.name+' · 独立构思后反馈对话'},
         {id:t.id,phase:3,condition:'ai_feedback',label:q.name+' · AI 组终稿'},
         {id:t.id,phase:4,condition:'ai_feedback',label:q.name+' · 自我评价'});
     } else options.push({id:t.id,phase:1,condition:'initial_only',label:q.name});
   }
   previewSelect.replaceChildren();
-  for(const o of options){const option=document.createElement('option');option.value=`${o.id}|${o.phase}|${o.condition}`;option.textContent=o.label;previewSelect.append(option);}
-  if(options.some(o=>`${o.id}|${o.phase}|${o.condition}`===old))previewSelect.value=old;
+  for(const o of options){const option=document.createElement('option');option.value=`${o.id}|${o.phase}|${o.condition}|${o.timing||'after_draft'}`;option.textContent=o.label;previewSelect.append(option);}
+  if(options.some(o=>`${o.id}|${o.phase}|${o.condition}|${o.timing||'after_draft'}`===old))previewSelect.value=old;
   if(!options.length){const option=document.createElement('option');option.textContent='请先选择题目';option.value='';previewSelect.append(option);}
-  const [id,phase,condition]=previewSelect.value.split('|');
+  const [id,phase,condition,timing]=previewSelect.value.split('|');
   const index=tasks.findIndex(t=>t.id===id);
-  previewFrame.contentWindow?.postMessage({type:'xc-preview-plan',tasks,index,phase:Number(phase),condition},window.location.origin);
+  previewFrame.contentWindow?.postMessage({type:'xc-preview-plan',tasks,index,phase:Number(phase),condition,timing},window.location.origin);
   if(window.parent!==window)window.parent.postMessage({type:'xiangcheng:question-plan',tasks},'https://rabbit-review-yincheng-20261030.shia.chatgpt.site');
 }
 window.addEventListener('message',event=>{
