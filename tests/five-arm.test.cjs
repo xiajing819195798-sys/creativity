@@ -88,3 +88,55 @@ test('反馈组笼统夸奖未通过审查时重试，保留针对想法的反�
   await h.sendAiMessage();assert.equal(calls.length,4);assert.match(calls[1][0].content,/没有解释具体原因/);
   const reply=s.answers.human_ai_bunny.chat[1];assert.match(reply.content,/交流方式/);assert.equal(reply.used_safe_fallback,false);assert.equal(reply.rejected_response_count,1);
 });
+
+test('新版使用 Hy4 生成和 Hy3 审查并记录耗时，提示词与旧五组完全一致',async()=>{
+  for(const code of ['early_socratic','early_feedback']){
+    const prompts=[];
+    for(const instrumentVersion of ['creativity_assessment_xiangcheng_five_arm_v2','creativity_assessment_xiangcheng_five_arm_v3']){
+      const h=harness(),s=state(code),calls=[];s.meta.instrumentVersion=instrumentVersion;
+      h.setTasks([bunny]);h.setState(s);h.setInput('chatInput','我想让兔子讲故事');
+      h.setCloud(()=>({ai:()=>({createModel:()=>({generateText:async arg=>{calls.push(arg);return {text:calls.length===1?'讲故事让兔子更像陪伴伙伴。':'ALLOW'}}})})}));
+      await h.sendAiMessage();assert.equal(calls.length,2);prompts.push(calls[0].messages[0].content);
+      const out=s.answers.human_ai_bunny.chat[1],v3=instrumentVersion.endsWith('_v3');
+      assert.equal(calls[0].model,v3?'hy4':'hy4-preview');assert.equal(calls[1].model,v3?'hy3':'hy4-preview');
+      assert.equal(out.model,v3?'hy4':'hy4-preview');
+      if(v3){assert.equal(calls[0].thinking.type,'disabled');assert.equal(calls[1].thinking.type,'disabled');assert.equal(out.audit_model,'hy3');assert.equal(out.generation_attempts,1);assert.equal(out.audit_attempts,1);assert.ok(out.total_response_ms>=0);assert.equal(h.rowData().human_ai_bunny_initial_status,'not_applicable')}
+    }
+    assert.equal(prompts[0],prompts[1]);
+  }
+});
+
+test('新版语义审查拒绝或不可用时不向学生显示未审核内容',async()=>{
+  for(const verdicts of [['REJECT','REJECT'],['ERROR']]){
+    const h=harness(),s=state('early_feedback'),calls=[];s.meta.instrumentVersion='creativity_assessment_xiangcheng_five_arm_v3';h.setTasks([bunny]);h.setState(s);
+    h.setCloud(()=>({ai:()=>({createModel:()=>({generateText:async arg=>{calls.push(arg);if(arg.model==='hy4')return {text:'这是一个需要深入思考的兔子设计。'};const v=verdicts.shift();if(v==='ERROR')throw new Error('审查不可用');return {text:v}}})})}));
+    await h.sendAiMessage();const reply=s.answers.human_ai_bunny.chat[1];assert.equal(reply.used_safe_fallback,true);assert.match(reply.content,/毛绒玩具/);assert.equal(reply.audit_model,'hy3');assert.ok(reply.audit_attempts>=1);
+  }
+});
+
+test('苏格拉底组审查一个问号中的多个方面并重试，反馈组不添加追问要求',async()=>{
+  const h=harness(),s=state('early_socratic'),calls=[];s.meta.instrumentVersion='creativity_assessment_xiangcheng_five_arm_v3';h.setTasks([bunny]);h.setState(s);h.setInput('chatInput','我想让兔子讲故事');
+  const results=['你想让它在什么时候、给谁讲故事呢？','REJECT','你希望兔子给谁讲故事呢？','ALLOW'];
+  h.setCloud(()=>({ai:()=>({createModel:()=>({generateText:async arg=>{calls.push(arg);return {text:results.shift()}}})})}));
+  await h.sendAiMessage();assert.equal(calls.length,4);assert.match(calls[1].messages[0].content,/一个问号里同时询问不同方面/);assert.match(calls[3].messages[0].content,/学生表达结束意愿时不强制追问/);
+  const reply=s.answers.human_ai_bunny.chat[1];assert.equal(reply.content,'你希望兔子给谁讲故事呢？');assert.equal(reply.used_safe_fallback,false);assert.equal(reply.rejected_response_count,1);
+  const f=harness(),fs=state('early_feedback'),feedbackCalls=[];fs.meta.instrumentVersion='creativity_assessment_xiangcheng_five_arm_v3';f.setTasks([bunny]);f.setState(fs);
+  f.setCloud(()=>({ai:()=>({createModel:()=>({generateText:async arg=>{feedbackCalls.push(arg);return {text:feedbackCalls.length===1?'我们回到毛绒玩具的改造。':'ALLOW'}}})})}));
+  await f.sendAiMessage();assert.doesNotMatch(feedbackCalls[1].messages[0].content,/苏格拉底式回复/);
+});
+
+test('新版苏格拉底兜底兼顾已有构想、偏题、结束意愿与避免重复',async()=>{
+  async function fallback(message,code='early_socratic',selected='',history=[],version='creativity_assessment_xiangcheng_five_arm_v3'){
+    const h=harness(),s=state(code);s.meta.instrumentVersion=version;s.answers.human_ai_bunny.selectedIdea=selected;s.answers.human_ai_bunny.chat=history;h.setTasks([bunny]);h.setState(s);h.setInput('chatInput',message);
+    h.setCloud(()=>({ai:()=>({createModel:()=>({generateText:async()=>({text:'比如可以安装芯片。'})})})}));
+    await h.sendAiMessage();return s.answers.human_ai_bunny.chat.at(-1);
+  }
+  assert.equal((await fallback('我想让兔子会讲故事')).content,'你希望改进后的毛绒玩具给使用者带来什么体验？');
+  assert.equal((await fallback('我喜欢吃苹果')).content,'你想怎样改进这个毛绒玩具？');
+  assert.equal((await fallback('兔子会不会吃苹果')).content,'你想怎样改进这个毛绒玩具？');
+  assert.equal((await fallback('我不知道','late_socratic','让它会讲故事')).content,'你希望改进后的毛绒玩具给使用者带来什么体验？');
+  assert.equal((await fallback('我喜欢吃苹果','late_socratic','让它会讲故事')).content,'你想怎样改进这个毛绒玩具？');
+  assert.equal((await fallback('我不想再聊了')).content,'好的，你可以结束讨论并填写最终方案。');
+  assert.equal((await fallback('我想让兔子会讲故事','early_socratic','',[{role:'assistant',content:'你希望改进后的毛绒玩具给使用者带来什么体验？'}])).content,'你希望谁来使用改进后的毛绒玩具？');
+  assert.equal((await fallback('我想让兔子会讲故事','early_socratic','',[],'creativity_assessment_xiangcheng_five_arm_v2')).content,'你想怎样改进这个毛绒玩具？');
+});
