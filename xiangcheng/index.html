@@ -134,7 +134,7 @@
   tasks[0].figure='<div class="stimulus"><img src="../assets/images/comic-title.png" alt="漫画标题题目图片：灯泡中的地球"></div>';
   tasks[1].figure='<div class="stimulus"><img src="../assets/images/story-2983.png" alt="数字故事2983题目图片：封面写有2983的橙色书本"></div>';
   tasks[3].figure='<div class="stimulus"><img src="../assets/images/plush-rabbit.webp" alt="一只普通的浅米色毛绒兔玩具"></div>';
-  tasks[4].figure='<div class="stimulus"><img src="../assets/images/ice-cream-melting.png" alt="夏天一盒冰淇淋在路上可能融化的情境插画"></div>';
+  tasks[4].figure='<div class="stimulus"><img src="../assets/images/ice-cream-melting.png" alt="夏天路上正在融化的冰淇淋"></div>';
   var allTasks=tasks.slice();
   function applyTaskPlan(plan){
     if(!Array.isArray(plan)||!plan.length||plan.length>allTasks.length)throw new Error("未设置施测题目");
@@ -247,13 +247,19 @@
       vals.forEach(function(v,i){box.appendChild(ideaRow(i,v))});area.appendChild(box);
       if(t.maxIdeas>t.minIdeas){var add=document.createElement("button");add.type="button";add.className="add";add.textContent="+ 再添加一个想法";add.onclick=function(){capture();var arr=state.answers[t.id]||[];if(arr.length>=t.maxIdeas){toast("本题最多填写 "+t.maxIdeas+" 条");return}arr.push("");state.answers[t.id]=arr;render();setTimeout(function(){var ins=document.querySelectorAll(".idea");ins[ins.length-1].focus()},0)};area.appendChild(add)}
     }else if(t.type==="ice_cream"){
-      var ice=iceAnswer(t),box=document.createElement("div");box.className="ideas";box.id="ideaBox";
-      var first=document.createElement("p");first.textContent="第一步：请尽量多写出不同的办法。每格写一个想法。";area.appendChild(first);
-      ice.ideas.forEach(function(v,i){box.appendChild(ideaRow(i,v))});area.appendChild(box);
-      var addIce=document.createElement("button");addIce.type="button";addIce.className="add";addIce.textContent="+ 再添加一个想法";
-      addIce.onclick=function(){capture();var a=iceAnswer(t);if(a.ideas.length>=30){toast("本题最多填写30个想法");return}a.ideas.push("");render();setTimeout(function(){var inputs=document.querySelectorAll(".idea");inputs[inputs.length-1].focus()},0)};area.appendChild(addIce);
-      var details=document.createElement("div");details.className="meta-grid";details.innerHTML='<label class="meta-question"><span class="mini-label">第二步：请选择一个想法</span><select id="iceChoice" aria-label="选择想法"><option value="">请选择</option>'+ice.ideas.map(function(v,i){return '<option value="'+i+'"'+(ice.selectedIndex===i?' selected':'')+'>第'+(i+1)+'个想法</option>'}).join("")+'</select></label><label class="meta-question"><span class="mini-label">请把你选中的想法写成具体方案：需要什么？怎样做？</span><textarea class="answer" id="icePlan" placeholder="请写出你的方案……">'+esc(ice.plan)+'</textarea></label><label class="meta-question"><span class="mini-label">第三步：如果不能使用电和电池，你会怎样调整方案？</span><textarea class="answer" id="iceAdaptation" placeholder="请写出你的想法……">'+esc(ice.adaptation)+'</textarea></label><label class="meta-question"><span class="mini-label">你为什么这样调整？如果你改变了原来的想法，也可以说说改变在哪里。</span><textarea class="answer" id="iceReason" placeholder="请写出你的理由……">'+esc(ice.reason)+'</textarea></label>';area.appendChild(details);
-      Array.prototype.forEach.call(details.querySelectorAll("textarea,select"),function(input){input.addEventListener("input",debouncedSave);input.addEventListener("change",debouncedSave)});
+      var ice=iceAnswer(t),heading=document.createElement("h3");heading.textContent="第 "+ice.phase+" 步 / 共 4 步";area.appendChild(heading);
+      if(ice.phase===1){
+        var first=document.createElement("p");first.textContent="请尽量多写出不同的办法。每格写一个想法。";area.appendChild(first);
+        var box=document.createElement("div");box.className="ideas";box.id="ideaBox";ice.ideas.forEach(function(v,i){box.appendChild(ideaRow(i,v))});area.appendChild(box);
+        var addIce=document.createElement("button");addIce.type="button";addIce.className="add";addIce.textContent="+ 再添加一个想法";
+        addIce.onclick=function(){capture();var a=iceAnswer(t);if(a.ideas.length>=30){toast("本题最多填写30个想法");return}a.ideas.push("");render();setTimeout(function(){var inputs=document.querySelectorAll(".idea");inputs[inputs.length-1].focus()},0)};area.appendChild(addIce);
+      }else{
+        var details=document.createElement("div");details.className="meta-grid";
+        if(ice.phase===2)details.innerHTML='<label class="meta-question"><span class="mini-label">请选择一个想法</span><select id="iceChoice" aria-label="选择想法"><option value="">请选择</option>'+ice.ideas.map(function(v,i){return String(v||"").trim()?'<option value="'+i+'"'+(ice.selectedIndex===i?' selected':'')+'>第'+(i+1)+'个：'+esc(v)+'</option>':""}).join("")+'</select></label><label class="meta-question"><span class="mini-label">请把选中的想法写成具体方案：需要什么？怎样做？</span><textarea class="answer" id="icePlan" placeholder="请写出你的方案……">'+esc(ice.plan)+'</textarea></label>';
+        else if(ice.phase===3)details.innerHTML='<label class="meta-question"><span class="mini-label">如果不能使用电和电池，你会怎样调整方案？如果原方案本来就不用电且仍可使用，可以说明。</span><textarea class="answer" id="iceAdaptation" placeholder="请写出你的想法……">'+esc(ice.adaptation)+'</textarea></label><label class="meta-question"><span class="mini-label">你为什么这样想？如果你改变了原来的方案，也可以说说改变在哪里。</span><textarea class="answer" id="iceReason" placeholder="请写出你的理由……">'+esc(ice.reason)+'</textarea></label>';
+        else details.innerHTML='<label class="meta-question"><span class="mini-label">再想一想，你对这个问题、相关事物的作用或它们之间的关系，有没有新的理解？如果有，请说说改变在哪里；如果没有，也可以说明没有改变，或者留空。</span><textarea class="answer" id="iceReframing" placeholder="请写出你的想法……">'+esc(ice.reframing)+'</textarea></label>';
+        area.appendChild(details);Array.prototype.forEach.call(details.querySelectorAll("textarea,select"),function(input){input.addEventListener("input",debouncedSave);input.addEventListener("change",debouncedSave)});
+      }
     }else if(t.type==="claw"){
       renderClaw(area,t);
     }else if(t.type==="ticket"){
@@ -263,15 +269,16 @@
     }
     var staged=t.type==="collaboration"&&collaborationAnswer(t).phase<4;
     el("next").classList.toggle("hidden",staged);
-    el("next").textContent=state.current===tasks.length-1?"完成并检查":"保存并下一题";updateCountdown();save();
+    el("next").textContent=t.type==="ice_cream"&&iceAnswer(t).phase<4?"保存并进入下一步":state.current===tasks.length-1?"完成并检查":"保存并下一题";updateCountdown();save();
   }
   function iceAnswer(t){
-    var a=state.answers[t.id];if(!a||typeof a!=="object"||Array.isArray(a))a={};
+    var a=state.answers[t.id];if(!a||typeof a!=="object"||Array.isArray(a))a={taskVersion:"ice_cream_steps_v2"};
+    if(!a.taskVersion)a.taskVersion=PREVIEW?"ice_cream_steps_v2":"ice_cream_single_v1";
     a.ideas=Array.isArray(a.ideas)?a.ideas:["","",""];while(a.ideas.length<3)a.ideas.push("");
     a.selectedIndex=Number.isInteger(a.selectedIndex)&&a.selectedIndex>=0&&a.selectedIndex<a.ideas.length?a.selectedIndex:null;
-    a.plan=typeof a.plan==="string"?a.plan:"";a.adaptation=typeof a.adaptation==="string"?a.adaptation:"";a.reason=typeof a.reason==="string"?a.reason:"";state.answers[t.id]=a;return a;
+    a.plan=typeof a.plan==="string"?a.plan:"";a.adaptation=typeof a.adaptation==="string"?a.adaptation:"";a.reason=typeof a.reason==="string"?a.reason:"";a.reframing=typeof a.reframing==="string"?a.reframing:"";a.phase=Math.max(1,Math.min(4,Number(a.phase)||1));state.answers[t.id]=a;return a;
   }
-  function iceText(a){a=a||{};return ["构想：",(a.ideas||[]).map(function(x,i){return String(x||"").trim()?"想法"+(i+1)+"："+String(x).trim():""}).filter(Boolean).join("\n"),"选中想法："+(Number.isInteger(a.selectedIndex)?"第"+(a.selectedIndex+1)+"个："+((a.ideas||[])[a.selectedIndex]||""):"未选择"),"具体方案："+(a.plan||""),"无电条件下的调整："+(a.adaptation||""),"调整理由："+(a.reason||"")].join("\n");}
+  function iceText(a){a=a||{};return ["构想：",(a.ideas||[]).map(function(x,i){return String(x||"").trim()?"想法"+(i+1)+"："+String(x).trim():""}).filter(Boolean).join("\n"),"选中想法："+(Number.isInteger(a.selectedIndex)?"第"+(a.selectedIndex+1)+"个："+((a.ideas||[])[a.selectedIndex]||""):"未选择"),"具体方案："+(a.plan||""),"无电条件下的调整："+(a.adaptation||""),"调整理由："+(a.reason||""),"换角度理解："+(a.reframing||"")].join("\n");}
   function collaborationAnswer(t){
     var a=state.answers[t.id];
     if(!a||typeof a!=="object"||Array.isArray(a))a={};
@@ -562,9 +569,9 @@
     if(t.type==="text"){var a=el("singleAnswer");if(a)state.answers[t.id]=a.value.trim()}
     else if(t.type==="ideas"){state.answers[t.id]=Array.prototype.map.call(document.querySelectorAll(".idea"),function(x){return x.value.trim()})}
     else if(t.type==="ice_cream"){
-      var ice=iceAnswer(t);ice.ideas=Array.prototype.map.call(document.querySelectorAll(".idea"),function(x){return x.value.trim()});
+      var ice=iceAnswer(t),iceInputs=document.querySelectorAll(".idea");if(iceInputs.length)ice.ideas=Array.prototype.map.call(iceInputs,function(x){return x.value.trim()});
       var choice=el("iceChoice");if(choice){var value=choice.value;ice.selectedIndex=value!==""&&Number.isInteger(Number(value))?Number(value):null}
-      if(el("icePlan"))ice.plan=el("icePlan").value.trim();if(el("iceAdaptation"))ice.adaptation=el("iceAdaptation").value.trim();if(el("iceReason"))ice.reason=el("iceReason").value.trim();
+      if(el("icePlan"))ice.plan=el("icePlan").value.trim();if(el("iceAdaptation"))ice.adaptation=el("iceAdaptation").value.trim();if(el("iceReason"))ice.reason=el("iceReason").value.trim();if(el("iceReframing"))ice.reframing=el("iceReframing").value.trim();
     }
     else if(t.type==="claw"){
       state.answers[t.id]=clawAnswer(t);
@@ -589,7 +596,9 @@
     if(PREVIEW)return;
     capture();var t=tasks[state.current];
     if(t.type==="ice_cream"){
-      var ice=iceAnswer(t);if(!Number.isInteger(ice.selectedIndex)||!String(ice.ideas[ice.selectedIndex]||"").trim()||!ice.plan.trim()){toast("请先写出想法、选择一个想法并填写方案");save();return}
+      var ice=iceAnswer(t);if(ice.phase===1&&!ice.ideas.some(function(v){return String(v||"").trim()})){toast("请先写出至少一个想法");save();return}
+      if(ice.phase===2&&(!Number.isInteger(ice.selectedIndex)||!String(ice.ideas[ice.selectedIndex]||"").trim()||!ice.plan.trim())){toast("请先选择一个已填写的想法并写出方案");save();return}
+      if(ice.phase<4){ice.phase+=1;save();render();return}
     }
     if(t.type==="ticket"){
       var ta=ticketAnswer(t);if(ta.submissions.length<3){toast("请先完成并保存三个车票任务");save();return}if(!ta.self.confidence||!ta.self.strategies.length||!ta.self.reflection.trim()){toast("请完成车票任务的自我评价和简短反思");save();return}
@@ -697,7 +706,7 @@
         }
         o[t.id+"_response"]=a.finalAnswer||"";o[t.id+"_final_status"]=state.condition==="initial_only"?"not_applicable":(a.finalAnswer?"answered":"missing");o[t.id+"_initial_ideas_json"]=JSON.stringify(a.initialIdeas||[]);o[t.id+"_offload_self_report_json"]=JSON.stringify(isAiCondition(state.condition)?(a.offload||null):null);o[t.id+"_initial_ideas"]=(a.initialIdeas||[]).filter(Boolean).join(" | ");o[t.id+"_selected_idea"]=a.selectedIdea||"";o[t.id+"_condition"]=state.condition;o[t.id+"_reflection_weakness"]=(a.reflection&&a.reflection.weakness)||"";o[t.id+"_reflection_improvement"]=(a.reflection&&a.reflection.improvement)||"";o[t.id+"_chat_json"]=JSON.stringify(a.chat||[]);o[t.id+"_ai_decisions_json"]=JSON.stringify(decisions);o[t.id+"_ai_decision_count"]=0;o[t.id+"_ai_decision_complete_count"]=0;o[t.id+"_final_answer_history_json"]=JSON.stringify(a.finalAnswerHistory||[]);o[t.id+"_final_answer_events_json"]=JSON.stringify(a.finalAnswerEvents||[]);o[t.id+"_final_answer_version_count"]=(a.finalAnswerHistory||[]).length;o[t.id+"_ai_error"]=a.aiError||"";o[t.id+"_phase"]=a.phase||1;o[t.id+"_initial_snapshot_json"]=JSON.stringify(a.initialSnapshot||null);o[t.id+"_phase_events_json"]=JSON.stringify(a.phaseEvents||[]);o[t.id+"_phase_seconds_json"]=JSON.stringify(a.phaseSeconds||{});o[t.id+"_treatment_completed_at"]=a.treatmentCompletedAt||"";o[t.id+"_final_locked_at"]=a.finalLockedAt||"";o[t.id+"_treatment_skipped"]=a.treatmentSkipped===true;o[t.id+"_meta_skipped"]=a.metaSkipped===true;o[t.id+"_meta_quality"]=(a.meta&&a.meta.quality)||"";o[t.id+"_meta_confidence"]=(a.meta&&a.meta.confidence)||"";o[t.id+"_meta_effort"]=(a.meta&&a.meta.effort)||"";o[t.id+"_meta_difficulty"]=(a.meta&&a.meta.difficulty)||"";o[t.id+"_meta_strategies_json"]=JSON.stringify((a.meta&&a.meta.strategies)||[]);o[t.id+"_meta_strength"]=(a.meta&&a.meta.strength)||"";o[t.id+"_meta_gap"]=(a.meta&&a.meta.gap)||"";
       }else if(t.type==="ice_cream"){
-        a=a||{};o[t.id+"_response"]=hasResponse(t,a)?iceText(a):"";o[t.id+"_ideas_json"]=JSON.stringify(a.ideas||[]);o[t.id+"_selected_index"]=Number.isInteger(a.selectedIndex)?a.selectedIndex+1:"";o[t.id+"_selected_idea"]=Number.isInteger(a.selectedIndex)?(a.ideas||[])[a.selectedIndex]||"":"";o[t.id+"_plan"]=a.plan||"";o[t.id+"_adaptation"]=a.adaptation||"";o[t.id+"_reason"]=a.reason||"";
+        a=a||{};o[t.id+"_task_version"]=a.taskVersion||"ice_cream_single_v1";o[t.id+"_response"]=hasResponse(t,a)?iceText(a):"";if(a.taskVersion==="ice_cream_steps_v2")o[t.id+"_v2_response"]=o[t.id+"_response"];o[t.id+"_ideas_json"]=JSON.stringify(a.ideas||[]);o[t.id+"_idea_count_raw"]=(a.ideas||[]).filter(function(v){return String(v||"").trim()}).length;o[t.id+"_selected_index"]=Number.isInteger(a.selectedIndex)?a.selectedIndex+1:"";o[t.id+"_selected_idea"]=Number.isInteger(a.selectedIndex)?(a.ideas||[])[a.selectedIndex]||"":"";o[t.id+"_plan"]=a.plan||"";o[t.id+"_adaptation"]=a.adaptation||"";o[t.id+"_reason"]=a.reason||"";o[t.id+"_reframing"]=a.reframing||"";o[t.id+"_phase"]=a.phase||1;
       }else if(t.type==="ticket"){
         a=a||{};var r1=(a.submissions||[])[0]||{},r2=(a.submissions||[])[1]||{},r3=(a.submissions||[])[2]||{};
         o[t.id+"_response"]=JSON.stringify(a.submissions||[]);o[t.id+"_round1_json"]=JSON.stringify(r1);o[t.id+"_round2_json"]=JSON.stringify(r2);o[t.id+"_round3_json"]=JSON.stringify(r3);o[t.id+"_round1_cost"]=r1.cost==null?"":r1.cost;o[t.id+"_round2_cost"]=r2.cost==null?"":r2.cost;o[t.id+"_round3_cost"]=r3.cost==null?"":r3.cost;o[t.id+"_round1_correct"]=r1.correct==null?"":r1.correct;o[t.id+"_round2_correct"]=r2.correct==null?"":r2.correct;o[t.id+"_round3_correct"]=r3.correct==null?"":r3.correct;o[t.id+"_round2_compared"]=!!r2.compared_target_options;o[t.id+"_unavailable_views"]=a.unavailableViews||0;o[t.id+"_unavailable_attempts"]=a.unavailableAttempts||0;o[t.id+"_adapted_after_unavailable"]=!!r3.adapted_after_unavailable;o[t.id+"_round1_valid"]=r1.correct==null?"":r1.correct;o[t.id+"_round2_valid"]=r2.correct==null?"":r2.correct;o[t.id+"_round1_optimal"]=r1.correct==null?"":r1.correct;o[t.id+"_round2_optimal"]=r2.correct==null?"":r2.correct;o[t.id+"_adapted_optimal"]=!!r3.adapted_after_unavailable;o[t.id+"_explored_json"]=JSON.stringify(a.explored||{});o[t.id+"_help_views"]=a.helpViews||0;o[t.id+"_confidence"]=(a.self&&a.self.confidence)||"";o[t.id+"_strategies_json"]=JSON.stringify((a.self&&a.self.strategies)||[]);o[t.id+"_reflection"]=(a.self&&a.self.reflection)||"";o[t.id+"_events_json"]=JSON.stringify(a.events||[]);o[t.id+"_event_count"]=(a.events||[]).length;
@@ -748,7 +757,7 @@
         if(![1,2,3,4].includes(phase))phase=1;
         if(!["ai","reflection","control","initial_only","ai_socratic","ai_feedback"].includes(condition))condition="initial_only";
         state={meta:{instrumentVersion:INSTRUMENT_VERSION},answers:{},taskStarted:{},taskDeadline:{},taskSeconds:{},current:index,condition:condition,assignment:{ai_timing:event.data.timing==="before_draft"?"before_draft":"after_draft"},startedAt:new Date().toISOString(),submittedAt:null};
-        if(tasks[index].type==="collaboration")state.answers[tasks[index].id]={phase:phase};
+        if(tasks[index].type==="collaboration"||tasks[index].type==="ice_cream")state.answers[tasks[index].id]={phase:phase};
         show("test");render();
         // Read-only preview: never allow sending AI requests, saving, or progressing.
         Array.prototype.forEach.call(el("test").querySelectorAll("button,input,select,textarea"),function(node){node.disabled=true});

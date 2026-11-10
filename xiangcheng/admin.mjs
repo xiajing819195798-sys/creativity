@@ -73,6 +73,8 @@ function syncPreview(){
         {id:t.id,phase:3,condition:'ai_feedback',timing:'before_draft',label:q.name+' · 第一轮 AI 组最终方案'},
         {id:t.id,phase:3,condition:'ai_feedback',timing:'after_draft',label:q.name+' · 初稿后 AI 组最终方案'},
         {id:t.id,phase:4,condition:'ai_feedback',label:q.name+' · 自我评价'});
+    } else if(t.id==='ice_cream_melting'){
+      for(const [phase,label] of [[1,'提出想法'],[2,'选择与完善方案'],[3,'条件变化与调整'],[4,'重新理解问题']])options.push({id:t.id,phase,condition:'initial_only',label:q.name+' · '+label});
     } else options.push({id:t.id,phase:1,condition:'initial_only',label:q.name});
   }
   previewSelect.replaceChildren();
