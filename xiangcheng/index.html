@@ -166,6 +166,13 @@
     do{window.crypto.getRandomValues(values)}while(values[0]>=limit);
     return values[0]%bound;
   }
+  function newClientToken(){
+    if(typeof window.crypto.randomUUID==="function")return window.crypto.randomUUID();
+    var bytes=new Uint8Array(16);window.crypto.getRandomValues(bytes);
+    bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;
+    var hex="";for(var i=0;i<bytes.length;i++)hex+=(bytes[i]+256).toString(16).slice(1);
+    return hex.slice(0,8)+"-"+hex.slice(8,12)+"-"+hex.slice(12,16)+"-"+hex.slice(16,20)+"-"+hex.slice(20);
+  }
   function newAssignment(grade){
     var first=randomBelow(3)===0?"control":"ai";
     var second=first==="ai"?(randomBelow(2)===0?"ai_socratic":"ai_feedback"):"not_applicable";
@@ -221,7 +228,7 @@
     var button=el("begin");if(button.disabled)return;button.disabled=true;
     try{
       var pendingKey=KEY+"_pending_five_arm",identity=JSON.stringify([sid,grade,cc,gradeConfig.version]),pending=JSON.parse(localStorage.getItem(pendingKey)||"null");
-      if(!pending||pending.identity!==identity){pending={identity:identity,token:window.crypto.randomUUID()};localStorage.setItem(pendingKey,JSON.stringify(pending))}
+      if(!pending||pending.identity!==identity){pending={identity:identity,token:newClientToken()};localStorage.setItem(pendingKey,JSON.stringify(pending))}
       var result=await aiResponseWithTimeout(getCloudApp().rdb().rpc("creativity_xc_allocate_five_arm_20261110",{p_config_version:gradeConfig.version,p_client_token:pending.token,p_grade:Number(grade)}),15000);
       if(result.error)throw result.error;
       var assignment=fiveArmAssignment(result.data);
